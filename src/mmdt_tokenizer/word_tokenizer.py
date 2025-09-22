@@ -5,6 +5,7 @@ from .preprocess import preprocess_text, normalize_input
 from .postprocess import refine_tokens
 from .segment import forward_mm, backward_mm
 from .csv_utils import save_tokens_to_csv
+from .constants import BREAK_PATTERN
 
 
 class MyanmarWordTokenizer:
@@ -36,9 +37,15 @@ class MyanmarWordTokenizer:
 
         return all_tokens if return_list else [separator.join(toks) for toks in all_tokens]
     
+    def _syllable_break(self, text: str) -> list:
+        result = BREAK_PATTERN.sub(r'|\1', text)
+        if result.startswith('|'):
+            result = result[1:]
+        return result.split('|')
+    
     def _tokenize_one(self, text: str) -> List[str]:
         text = preprocess_text(text, self.space_remove_mode)
-        syllables = list(text)  # assume syllable_break already applied
+        syllables = self._syllable_break(text)
         path = self._choose_segmentation(syllables)
         tokens = [w for (_, _, w) in path]
         return refine_tokens(tokens)
