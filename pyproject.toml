@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mmdt-tokenizer"
+version = "0.1.0"
+description = "Myanmar text tokenizer for word- and syllable-level tokenization"
+authors = [
+    { name = "MMDT", email = "drmyothida@gmail.com" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+keywords = ["Myanmar", "Burmese", "Tokenizer", "NLP", "Text Processing"]
+
+dependencies = [
+    "pandas>=1.3",
+    "huggingface_hub>=0.13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black",
+    "flake8",
+]
+
+[tool.setuptools.packages]
+# This tells Setuptools to find packages in the 'src' directory.
+find = {where = ["src"]}
+
+[tool.pytest.ini_options]
+# Add the src directory to the PYTHONPATH for pytest.
+pythonpath = "src"
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [ "tests",]
+

@@ -22,6 +22,7 @@ This library draws inspiration from the [oppaWord: Myanmar Word Segmenter](https
 
 - `LICENSE` — license file (MIT)  
 - `pyproject.toml` — project metadata & build config  
+- `data/myg2p_mypos.dict` - dictionary file compiled from oppaword
 - `src/mmdt_tokenizer/` — the main library package  
   - `constants.py` — regexes, unicode letter/digit classes etc.  
   - `preprocess.py` — text cleanup, space removal  
