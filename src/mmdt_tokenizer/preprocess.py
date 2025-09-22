@@ -36,8 +36,10 @@ def preprocess_text(text: str, mode: str = "my_not_num") -> str:
 
 def normalize_input(texts, column=None) -> pd.Series:
     # FIXME: This function can be optimized further. I got NoneType error here.
-    print(f"Normalizing texts {texts}")
-    print(f"Normalizing input of type {type(texts)}")
+    # print(f"Normalizing texts {texts}")
+    # print(f"Normalizing input of type {type(texts)}")
+    if texts is None:
+        raise ValueError("Input 'texts' cannot be None")
     if isinstance(texts, pd.DataFrame):
         if not column:
             raise ValueError("Please specify 'column' for DataFrame input")
