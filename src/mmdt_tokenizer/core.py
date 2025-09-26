@@ -13,6 +13,8 @@ class MyanmarTokenizer:
         space_remove_mode="my_not_num",
         use_bimm_fallback=True,
         max_word_len=6,
+        dict_weight: float = 10.0,       # <-- dictionary score, review the values later
+        bimm_boost: float = 150,        # <-- BiMM score boost, review the values later
     ):
         if not Path(dict_path).is_file():
             dict_path = DICT_FILE_PATH
@@ -25,11 +27,13 @@ class MyanmarTokenizer:
             word_dict=word_dict,
             space_remove_mode=space_remove_mode,
             use_bimm_fallback=use_bimm_fallback,
-            max_word_len=max_word_len,
+            max_word_len=max_word_len, 
+            dict_weight=dict_weight,
+            bimm_boost=bimm_boost,
         )
         self.syllable_tokenizer = MyanmarSyllableTokenizer()
 
-    def word_tokenize(self, *args, **kwargs):
+    def word_tokenize(self,*args, **kwargs):
         return self.word_tokenizer.tokenize(*args, **kwargs)
 
     def syllable_tokenize(self, *args, **kwargs):

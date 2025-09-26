@@ -24,7 +24,8 @@ PROTECT_SPACES = [
 ]
 
 # Numbers (English or Myanmar digits, with , or .)
-NUMBER_PATTERN = re.compile(r'^[\d၀-၉][\d၀-၉,.]*$')
+NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$')
+
 
 # Syllable break pattern (OppaWord style)
 consonants = r"က-အ"

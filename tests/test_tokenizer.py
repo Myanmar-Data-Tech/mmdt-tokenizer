@@ -7,7 +7,7 @@ def tokenizer():
     return MyanmarTokenizer(
         space_remove_mode="my_not_num",
         use_bimm_fallback=True,
-        max_word_len=6
+        max_word_len=6,
     )
 
 
