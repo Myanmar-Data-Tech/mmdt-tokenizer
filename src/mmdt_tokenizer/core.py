@@ -15,6 +15,7 @@ class MyanmarTokenizer:
         max_word_len=6,
         dict_weight: float = 10.0,       # <-- dictionary score, review the values later
         bimm_boost: float = 150,        # <-- BiMM score boost, review the values later
+        protect_pattern :bool = True    
     ):
         if not Path(dict_path).is_file():
             dict_path = DICT_FILE_PATH
@@ -30,6 +31,7 @@ class MyanmarTokenizer:
             max_word_len=max_word_len, 
             dict_weight=dict_weight,
             bimm_boost=bimm_boost,
+            protect_pattern=protect_pattern
         )
         self.syllable_tokenizer = MyanmarSyllableTokenizer()
 

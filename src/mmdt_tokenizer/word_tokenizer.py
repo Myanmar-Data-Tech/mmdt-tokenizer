@@ -6,19 +6,21 @@ from .postprocess import refine_tokens, split_mixed_tokens
 from .segment import forward_mm, backward_mm, build_dag, viterbi
 from .csv_utils import save_tokens_to_csv
 from .constants import BREAK_PATTERN
+from .preprocess_with_protection import preprocess_burmese_text
 
 
 class MyanmarWordTokenizer:
     """Word-level tokenizer for Myanmar text."""
 
     def __init__(self, word_dict: set, space_remove_mode="my_not_num", use_bimm_fallback=True, max_word_len=6,
-                 dict_weight: float = 10.0, bimm_boost: float = 150):
+                 dict_weight: float = 10.0, bimm_boost: float = 150, protect_pattern :bool = True):
         self.word_dict = word_dict
         self.space_remove_mode = space_remove_mode
         self.use_bimm_fallback = use_bimm_fallback
         self.max_word_len = max(3, min(12, max_word_len)) # Fixme: reason for the numbers 3 and 12?
         self.dict_weight: float = dict_weight      # <-- dictionary score : need to investigate why default is 10
         self.bimm_boost: float = bimm_boost        # <-- BiMM score boost : need to investigate why default is 150
+        self.protect_pattern:bool = protect_pattern
 
     def tokenize(
         self,
@@ -46,21 +48,54 @@ class MyanmarWordTokenizer:
             result = result[1:]
         return result.split('|')
     
+    # def _tokenize_one(self, text: str) -> List[str]:
+    #     text = preprocess_text(text, self.space_remove_mode)
+    #     syllables = self._syllable_break(text)
+    #     # Get segmentation using DAG + BiMM fallback
+    #     path = self._choose_segmentation(syllables)
+    #     # Normalize path to token list
+    #     if path and isinstance(path[0], tuple):
+    #         tokens = [w for (_, _, w) in path]
+    #     elif path:
+    #         tokens = path
+    #     else:
+    #         tokens = syllables  # fallback: keep original syllables
+    #     tokens = [t.strip() for t in tokens if t.strip()]
+    #     # Split mixed Burmese+English
+    #     # tokens = split_mixed_tokens(tokens)
+    #     return refine_tokens(tokens)
+    
     def _tokenize_one(self, text: str) -> List[str]:
+        if self.protect_pattern:
+            tokens, protected = preprocess_burmese_text(text)
+            final_tokens = []
+            for tok in tokens:
+                if tok in protected:  # protected span → single token
+                    final_tokens.append(protected[tok])
+                else:  # normal segmentation
+                    segged = self._segment_and_refine(tok)
+                    final_tokens.extend(segged)
+            return final_tokens
+        else:
+            return self._segment_and_refine(text)
+
+    def _segment_and_refine(self, text: str) -> List[str]:
         text = preprocess_text(text, self.space_remove_mode)
         syllables = self._syllable_break(text)
+
         # Get segmentation using DAG + BiMM fallback
-        path = self._choose_segmentation(syllables)
-        # Normalize path to token list
-        if path and isinstance(path[0], tuple):
-            tokens = [w for (_, _, w) in path]
-        elif path:
-            tokens = path
-        else:
-            tokens = syllables  # fallback: keep original syllables
+        dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
+        tokens = (
+            viterbi(syllables, dag, self.bimm_boost, self.word_dict, self.dict_weight)
+            if dag
+            else [w for (_, _, w) in forward_mm(syllables, self.word_dict, self.max_word_len)]
+        )
+
+        # Normalize to tokens
+        if tokens and isinstance(tokens[0], tuple):
+            tokens = [w for (_, _, w) in tokens]
+
         tokens = [t.strip() for t in tokens if t.strip()]
-        # Split mixed Burmese+English
-        # tokens = split_mixed_tokens(tokens)
         return refine_tokens(tokens)
 
     def _choose_segmentation(self, syllables: list) -> list:
