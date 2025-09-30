@@ -51,8 +51,8 @@ def protect_patterns(text: str, protect) -> str:
     text = re.sub(r"(?:[0-9\u1040-\u1049]{1,2}):(?:[0-9\u1040-\u1049]{2})(?::(?:[0-9\u1040-\u1049]{2}))?", protect, text)
     # Decimals
     text = re.sub(r"(?:[0-9\u1040-\u1049]+\.[0-9\u1040-\u1049]+)", protect, text)
-    # Fractions
-    text = re.sub(r"[0-9\u1040-\u1049]+/[0-9\u1040-\u1049]+", protect, text)
+    # # Fractions
+    # text = re.sub(r"[0-9\u1040-\u1049]+/[0-9\u1040-\u1049]+", protect, text)
     # Phone numbers
     text = re.sub(r"(?:\+?95|09|၀၉)[\s\-]?(?:[0-9\u1040-\u1049][\s\-]?){6,}", protect, text)
     # Multi-digit numbers with thousands separators
