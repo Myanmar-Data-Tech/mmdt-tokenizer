@@ -14,6 +14,7 @@ MYANMAR_DIGIT = r'[\u1040-\u1049]'
 # Regex patterns for space handling
 RE_MM_LETTER_SPACE = re.compile(rf'({MYANMAR_LETTER})\s+({MYANMAR_LETTER})')
 RE_MM_DIGIT_DIGIT = re.compile(rf'({MYANMAR_DIGIT})\s+({MYANMAR_DIGIT})')
+
 RE_MM_DIGIT_LETTER = re.compile(rf'({MYANMAR_DIGIT})\s+({MYANMAR_LETTER})')
 RE_MM_LETTER_DIGIT = re.compile(rf'({MYANMAR_LETTER})\s+({MYANMAR_DIGIT})')
 
@@ -26,6 +27,7 @@ PROTECT_SPACES = [
 # Numbers (English or Myanmar digits, with , or .)
 NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$')
 PUNCT_PATTERN = re.compile(r'[-၊။()]')
+
 
 SPLIT_PATTERN = re.compile(
     r'\d+(?:[.,]\d+)*'                                     # 35000, ၁၅,၀၀၀, 3.5, ၃.၅
@@ -55,3 +57,9 @@ SYLLABLE_BREAK_PATTERN = re.compile(
     + r"|[" + en_char + other_char + r"])",
     re.UNICODE
 )
+
+# Precompiled regex patterns 
+PUNCT_PATTERN = re.compile(r'([\u104A\u104B.,;:\-\(\)\[\]\{\}%/\\\u2010-\u2015])') 
+PROTECTED_SPLIT_PATTERN = re.compile(r'(\x02PROT[A-Z]+\x03)') 
+# Protectable patterns (compiled once) for efficiency
+

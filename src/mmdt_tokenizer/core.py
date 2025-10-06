@@ -22,8 +22,8 @@ class MyanmarTokenizer:
         
         self.dict_path = dict_path
         word_dict = {line.strip() for line in open(self.dict_path, encoding="utf-8") if line.strip()}
-        print(f"Loaded {len(word_dict)} words from {self.dict_path}")
 
+        # Initialize tokenizers
         self.word_tokenizer = MyanmarWordTokenizer(
             word_dict=word_dict,
             space_remove_mode=space_remove_mode,
@@ -33,8 +33,10 @@ class MyanmarTokenizer:
             bimm_boost=bimm_boost,
             protect_pattern=protect_pattern
         )
+
         self.syllable_tokenizer = MyanmarSyllableTokenizer()
 
+    
     def word_tokenize(self,*args, **kwargs):
         return self.word_tokenizer.tokenize(*args, **kwargs)
 

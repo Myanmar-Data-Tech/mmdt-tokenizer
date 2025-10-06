@@ -27,11 +27,9 @@ dev = [
 ]
 
 [tool.setuptools.packages]
-# This tells Setuptools to find packages in the 'src' directory.
 find = {where = ["src"]}
 
 [tool.pytest.ini_options]
-# Add the src directory to the PYTHONPATH for pytest.
 pythonpath = "src"
 minversion = "7.0"
 addopts = "-ra -q"

@@ -2,7 +2,7 @@ import re
 import pandas as pd
 from typing import List, Union, Optional
 from .csv_utils import save_tokens_to_csv
-from .preprocess import normalize_input
+from .data_utils import standardize_text_input
 from .constants import SYLLABLE_BREAK_PATTERN
 
 
@@ -20,7 +20,7 @@ class MyanmarSyllableTokenizer:
         conll_style=True,
         column: Optional[str] = None,
     ):
-        series = normalize_input(texts, column)
+        series = standardize_text_input(texts, column)
         all_syllables = series.apply(self._break_one).tolist()
 
         if save_csv:

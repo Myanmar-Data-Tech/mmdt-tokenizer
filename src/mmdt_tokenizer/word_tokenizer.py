@@ -1,12 +1,12 @@
 import pandas as pd
 from typing import List, Union, Optional
 
-from .preprocess import preprocess_text, normalize_input
+from .data_utils import standardize_text_input
 from .postprocess import refine_tokens, split_mixed_tokens
 from .segment import forward_mm, backward_mm, build_dag, viterbi
 from .csv_utils import save_tokens_to_csv
 from .constants import BREAK_PATTERN
-from .preprocess_with_protection import preprocess_burmese_text
+from .preprocess_utils import preprocess_burmese_text
 
 
 class MyanmarWordTokenizer:
@@ -17,9 +17,9 @@ class MyanmarWordTokenizer:
         self.word_dict = word_dict
         self.space_remove_mode = space_remove_mode
         self.use_bimm_fallback = use_bimm_fallback
-        self.max_word_len = max(3, min(12, max_word_len)) # Fixme: reason for the numbers 3 and 12?
-        self.dict_weight: float = dict_weight      # <-- dictionary score : need to investigate why default is 10
-        self.bimm_boost: float = bimm_boost        # <-- BiMM score boost : need to investigate why default is 150
+        self.max_word_len = max(3, min(12, max_word_len)) # constrain max_word_len to [3, 12]
+        self.dict_weight: float = dict_weight      # <-- dictionary score 
+        self.bimm_boost: float = bimm_boost        # <-- BiMM score boost
         self.protect_pattern:bool = protect_pattern
 
     def tokenize(
@@ -31,9 +31,8 @@ class MyanmarWordTokenizer:
         conll_style=True,
         column: Optional[str] = None,
     ):
-        
-        
-        series = normalize_input(texts, column)
+                
+        series = standardize_text_input(texts, column)
         all_tokens = series.apply(self._tokenize_one).tolist()
 
         if save_csv:
