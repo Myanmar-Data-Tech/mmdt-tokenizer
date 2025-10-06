@@ -25,7 +25,16 @@ PROTECT_SPACES = [
 
 # Numbers (English or Myanmar digits, with , or .)
 NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$')
+PUNCT_PATTERN = re.compile(r'[-၊။()]')
 
+SPLIT_PATTERN = re.compile(
+    r'\d+(?:[.,]\d+)*'                                     # 35000, ၁၅,၀၀၀, 3.5, ၃.၅
+    r'|[\u1040-\u1049]+'                                   # extra safeguard for Myanmar digits if tokenizer missed \d
+    r'|[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF\u102B-\u103F\u1037\u1039]+'
+    r'|[A-Za-z]+'                                          # English
+    r'|[-၊။()]',                                           # punctuation to keep separate
+    re.UNICODE
+)
 
 # Syllable break pattern (OppaWord style)
 consonants = r"က-အ"

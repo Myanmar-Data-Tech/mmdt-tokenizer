@@ -1,26 +1,25 @@
 import re
 from typing import List
-from .constants import NUMBER_PATTERN
-
+from .constants import NUMBER_PATTERN, PUNCT_PATTERN, SPLIT_PATTERN
 
 def merge_numbers(tokens: List[str]) -> List[str]:
     """Merge consecutive numeric tokens (Myanmar/English digits, commas, dots)."""
-    merged = []
-    buf = []
+ 
+    merged, buf = [], []
+    join_buf, append = "".join, merged.append
+
     for tok in tokens:
         if NUMBER_PATTERN.match(tok):
             buf.append(tok)
         else:
             if buf:
-                merged.append("".join(buf))  # keep commas and dots inside
+                append(join_buf(buf))
                 buf = []
-            merged.append(tok)
+            append(tok)
     if buf:
-        merged.append("".join(buf))
-    return merged
+        append(join_buf(buf))
 
-# Step 1: Split standalone punctuation -၊။()
-_PUNCT_PATTERN = re.compile(r'[-၊။()]')
+    return merged
 
 def split_punctuation(tokens: List[str]) -> List[str]:
     """
@@ -28,12 +27,13 @@ def split_punctuation(tokens: List[str]) -> List[str]:
     Keeps numbers with internal commas/dots intact.
     """
     result = []
+    append = result.append
     for tok in tokens:
-        if _PUNCT_PATTERN.search(tok):
+        if PUNCT_PATTERN.search(tok):
             # split, keeping punctuation as separate tokens
-            parts = _PUNCT_PATTERN.split(tok)
-            puncts = _PUNCT_PATTERN.findall(tok)
-            # interleave non-empty parts with punctuation
+            parts = PUNCT_PATTERN.split(tok)
+            puncts = PUNCT_PATTERN.findall(tok)
+            # FIXME: handle edge cases with leading/trailing punctuation
             for i, part in enumerate(parts):
                 if part:
                     result.append(part)
@@ -44,14 +44,7 @@ def split_punctuation(tokens: List[str]) -> List[str]:
     return result
 
 
-_SPLIT_RE = re.compile(
-    r'\d+(?:[.,]\d+)*'                                     # 35000, ၁၅,၀၀၀, 3.5, ၃.၅
-    r'|[\u1040-\u1049]+'                                   # extra safeguard for Myanmar digits if tokenizer missed \d
-    r'|[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF\u102B-\u103F\u1037\u1039]+'
-    r'|[A-Za-z]+'                                          # English
-    r'|[-၊။()]',                                           # punctuation to keep separate
-    re.UNICODE
-)
+
 
 def split_word_digit(tokens: List[str]) -> List[str]:
     """
@@ -64,7 +57,7 @@ def split_word_digit(tokens: List[str]) -> List[str]:
         for sub in re.split(r'\s+', tok):
             if not sub:
                 continue
-            parts = _SPLIT_RE.findall(sub)
+            parts = SPLIT_PATTERN.findall(sub)
             # if nothing matched (rare), keep the whole subtoken unchanged
             out.extend(parts if parts else [sub])
     return out

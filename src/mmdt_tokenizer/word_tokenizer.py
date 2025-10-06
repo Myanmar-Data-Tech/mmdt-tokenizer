@@ -31,7 +31,7 @@ class MyanmarWordTokenizer:
         conll_style=True,
         column: Optional[str] = None,
     ):
-        # print(f"Tokenizing input texts...{texts}")
+        
         
         series = normalize_input(texts, column)
         all_tokens = series.apply(self._tokenize_one).tolist()
@@ -47,24 +47,7 @@ class MyanmarWordTokenizer:
         if result.startswith('|'):
             result = result[1:]
         return result.split('|')
-    
-    # def _tokenize_one(self, text: str) -> List[str]:
-    #     text = preprocess_text(text, self.space_remove_mode)
-    #     syllables = self._syllable_break(text)
-    #     # Get segmentation using DAG + BiMM fallback
-    #     path = self._choose_segmentation(syllables)
-    #     # Normalize path to token list
-    #     if path and isinstance(path[0], tuple):
-    #         tokens = [w for (_, _, w) in path]
-    #     elif path:
-    #         tokens = path
-    #     else:
-    #         tokens = syllables  # fallback: keep original syllables
-    #     tokens = [t.strip() for t in tokens if t.strip()]
-    #     # Split mixed Burmese+English
-    #     # tokens = split_mixed_tokens(tokens)
-    #     return refine_tokens(tokens)
-    
+
     def _tokenize_one(self, text: str) -> List[str]:
         if self.protect_pattern:
             tokens, protected = preprocess_burmese_text(text)
