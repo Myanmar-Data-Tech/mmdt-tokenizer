@@ -1,6 +1,7 @@
 import re
 import unicodedata
 from typing import Tuple, Dict, List
+from .preprocess import preprocess_text
 
 def _int_to_letters(n: int) -> str:
     """Convert integer to letters for placeholders (A, B, ..., AA, AB, ...)"""
@@ -16,6 +17,9 @@ def split_punct(text: str, protected: Dict[str, str]) -> List[str]:
     """
     Split punctuation as separate tokens, but keep protected placeholders intact.
     """
+    # Before splitting on whitespace, make placeholders separated by spaces so .split() sees them as tokens
+    text = re.sub(r'(\x02PROT[A-Z]+\x03)', r' \1 ', text)
+
     punct_pattern = r'([\u104A\u104B\.\,\;\:\-\(\)\[\]\{\}%/\\\u2010-\u2015])'
     parts = []
     for token in text.split():
@@ -76,13 +80,27 @@ def remove_punct_outside_protected(text: str) -> str:
 
 def separate_letters_digits(text: str, protected: Dict[str,str]) -> str:
     digits = r'0-9\u1040-\u1049'
-    # Cover: consonants, extensions, vowels, tones, asat, virama, etc.
-    burmese_letters = r'\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF\u102B-\u103F\u1037\u1039'
+    # # Cover: consonants, extensions, vowels, tones, asat, virama, etc.
+    # burmese_letters = r'\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF\u102B-\u103F\u1037\u1039'
+
+    # cover base letters and the common Myanmar combining marks / medials
+    burmese_letters = (
+        r'\u1000-\u109F'      # Myanmar block
+        r'\uAA60-\uAA7F'      # Myanmar extended-A
+        r'\uA9E0-\uA9FF'      # Myanmar extended-B
+        r'\u102B-\u103E'      # vowels, medial signs, etc.
+        r'\u1037\u1038'       # anusvara/visarga-like, etc.
+        r'\u1039\u103A'       # virama/asat
+        r'\u1050-\u109F'      # other extension area
+    )
+    # use that in regex char-class:
+    burmese_letters_class = fr'{burmese_letters}'
+
 
     # Insert space between letter → digit
-    text = re.sub(fr'(?<=[{burmese_letters}A-Za-z])(?=[{digits}])', ' ', text)
+    text = re.sub(fr'(?<=[{burmese_letters_class}A-Za-z])(?=[{digits}])', ' ', text)
     # Insert space between digit → letter
-    text = re.sub(fr'(?<=[{digits}])(?=[{burmese_letters}A-Za-z])', ' ', text)
+    text = re.sub(fr'(?<=[{digits}])(?=[{burmese_letters_class}A-Za-z])', ' ', text)
 
     return text
 
@@ -113,10 +131,16 @@ def preprocess_burmese_text(text: str) -> Tuple[List[str], Dict[str,str]]:
         raise ValueError("Input must be a string.")
 
     # Step 0: Normalize and clean
-    text = unicodedata.normalize("NFKC", text.strip())
-    text = re.sub(r"[~^*_+=<>\[\]{}|\\…“”‘’「」『』\"'#()]+|\.\.+", " ", text)
+    # text = unicodedata.normalize("NFKC", text.strip())
+    #text = re.sub(r"[~^*_+=<>\[\]{}|\\…“”‘’「」『』\"'#()]+|\.\.+", " ", text)
+   
+    text = re.sub(r"[~^*_+=<>\[\]{}|\\…“”‘’「」『』\"'#]+|\.\.+", " ", text)
+
     text = re.sub(r'[\u200B\u200C\u200D\uFEFF]', '', text)
     text = re.sub(r'\s+', ' ', text)
+
+    # Apply same space removal behavior as preprocess_text with given mode
+    text = preprocess_text(text)
 
     # Step 1: Collapse spaces around digits/dates/times
     text = collapse_digit_spaces(text)
@@ -129,10 +153,11 @@ def preprocess_burmese_text(text: str) -> Tuple[List[str], Dict[str,str]]:
         key = f"\x02PROT{_int_to_letters(counter)}\x03"
         protected[key] = m.group(0)
         counter += 1
-        return f" {key} "
+        # return f" {key} "
+        return key
     text = protect_patterns(text, protect)
 
-    # Step 3: Remove unwanted punctuation outside protected
+    # # Step 3: Remove unwanted punctuation outside protected
     text = remove_punct_outside_protected(text)
 
     # Step 4: Separate letters and digits

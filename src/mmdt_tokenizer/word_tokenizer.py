@@ -48,23 +48,6 @@ class MyanmarWordTokenizer:
             result = result[1:]
         return result.split('|')
     
-    # def _tokenize_one(self, text: str) -> List[str]:
-    #     text = preprocess_text(text, self.space_remove_mode)
-    #     syllables = self._syllable_break(text)
-    #     # Get segmentation using DAG + BiMM fallback
-    #     path = self._choose_segmentation(syllables)
-    #     # Normalize path to token list
-    #     if path and isinstance(path[0], tuple):
-    #         tokens = [w for (_, _, w) in path]
-    #     elif path:
-    #         tokens = path
-    #     else:
-    #         tokens = syllables  # fallback: keep original syllables
-    #     tokens = [t.strip() for t in tokens if t.strip()]
-    #     # Split mixed Burmese+English
-    #     # tokens = split_mixed_tokens(tokens)
-    #     return refine_tokens(tokens)
-    
     def _tokenize_one(self, text: str) -> List[str]:
         if self.protect_pattern:
             tokens, protected = preprocess_burmese_text(text)
@@ -82,7 +65,7 @@ class MyanmarWordTokenizer:
     def _segment_and_refine(self, text: str) -> List[str]:
         text = preprocess_text(text, self.space_remove_mode)
         syllables = self._syllable_break(text)
-
+      
         # Get segmentation using DAG + BiMM fallback
         dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
         tokens = (
@@ -90,7 +73,6 @@ class MyanmarWordTokenizer:
             if dag
             else [w for (_, _, w) in forward_mm(syllables, self.word_dict, self.max_word_len)]
         )
-
         # Normalize to tokens
         if tokens and isinstance(tokens[0], tuple):
             tokens = [w for (_, _, w) in tokens]

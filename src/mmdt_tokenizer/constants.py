@@ -26,19 +26,25 @@ PROTECT_SPACES = [
 # Numbers (English or Myanmar digits, with , or .)
 NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$')
 
-
-# Syllable break pattern (OppaWord style)
-consonants = r"က-အ"
-punctuation = r"၊|။"
-subscript = r"္"
-a_that = r"်"
-BREAK_PATTERN = re.compile(rf"((?<!{subscript})([{consonants}]|{punctuation})(?![{a_that}{subscript}]))", re.UNICODE)
-
 my_consonant = r'က-အ'
-en_char = r'a-zA-Z0-9'
-other_char = r'ဣဤဥဦဧဩဪဿ၌၍၏၀-၉၊။!-/:-@[-`{-~\s'
+other_char_no_num = r'ဣဤဥဦဧဩဪဿ၌၍၏၊။!-/:-@[-`{-~\s'  # Symbols, punctuation, space
 subscript_symbol = r'္'
 a_that = r'်'
+
+# --- Improved BREAK_PATTERN ---
+BREAK_PATTERN = re.compile(
+    r"((?<!" + subscript_symbol + r")[" + my_consonant + r"]"
+    r"(?![" + a_that + subscript_symbol + r"])"
+    + r"|[" + other_char_no_num + r"])",
+    re.UNICODE
+)
+
+
+# my_consonant = r'က-အ'
+en_char = r'a-zA-Z0-9'
+other_char = r'ဣဤဥဦဧဩဪဿ၌၍၏၀-၉၊။!-/:-@[-`{-~\s'
+#subscript_symbol = r'္'
+# a_that = r'်'
 
 SYLLABLE_BREAK_PATTERN = re.compile(
     r"((?<!" + subscript_symbol + r")[" + my_consonant + r"]"
