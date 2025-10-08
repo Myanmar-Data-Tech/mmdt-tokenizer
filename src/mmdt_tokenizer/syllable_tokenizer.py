@@ -31,4 +31,6 @@ class MyanmarSyllableTokenizer:
 
     def _break_one(self, text: str) -> List[str]:
         segmented = SYLLABLE_BREAK_PATTERN.sub(self.separator + r"\1", text.strip())
-        return segmented.lstrip(self.separator).split(self.separator)
+        tokens = segmented.lstrip(self.separator).split(self.separator)
+        cleaned_tokens = [tok for tok in tokens if tok] 
+        return cleaned_tokens
