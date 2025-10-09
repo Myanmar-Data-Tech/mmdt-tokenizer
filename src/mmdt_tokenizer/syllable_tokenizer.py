@@ -24,8 +24,7 @@ class MyanmarSyllableTokenizer:
         all_syllables = series.apply(self._break_one).tolist()
 
         if save_csv:
-            flat = [syl for sublist in all_syllables for syl in sublist] if len(all_syllables) > 1 else all_syllables[0]
-            save_tokens_to_csv(flat, save_csv, conll_style)
+            save_tokens_to_csv(all_syllables, save_csv, conll_style)
 
         return all_syllables if return_list else [self.separator.join(syls) for syls in all_syllables]
 
