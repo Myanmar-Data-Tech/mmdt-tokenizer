@@ -19,7 +19,7 @@ def preprocess_burmese_text(text: str) -> Tuple[List[str], Dict[str, str]]:
     # Step 1: Collapse digit/date/time spacing
     text = collapse_digit_spaces(text)
 
-    # Step 2: Protect patterns
+    # Step 2: Protect patterns--> (protection module)
     protected: Dict[str, str] = {}
     counter = 0
 
@@ -30,15 +30,15 @@ def preprocess_burmese_text(text: str) -> Tuple[List[str], Dict[str, str]]:
         counter += 1
         return f" {key} "
 
-    text = protect_patterns(text, protect)
+    text = protect_patterns(text, protect) 
 
-    # Step 3: Remove unwanted punctuation outside protected
+    # Step 3: Remove unwanted punctuation outside protected (cleaning module)
     text = remove_punct_outside_protected(text)
 
-    # Step 4: Separate letters and digits
+    # Step 4: Separate letters and digits (tokenization module)
     text = separate_letters_digits(text)
 
-    # Step 5: Split punctuation
+    # Step 5: Split punctuation (tokenzization module)
     tokens = split_punct(text, protected)
 
     # Step 6: Cleanup

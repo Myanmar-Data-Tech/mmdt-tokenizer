@@ -2,12 +2,10 @@ import pandas as pd
 from typing import List, Union, Optional
 
 from .data_utils import standardize_text_input
-from mmdt_tokenizer.postprocessing import refine_tokens, split_mixed_tokens
-from .segment import forward_mm, backward_mm, build_dag, viterbi
 from .csv_utils import save_tokens_to_csv
-from .constants import BREAK_PATTERN
 from mmdt_tokenizer.preprocessing import preprocess_burmese_text
 
+from .rule_segmenter import rule_segment
 
 class MyanmarWordTokenizer:
     """Word-level tokenizer for Myanmar text."""
@@ -31,7 +29,7 @@ class MyanmarWordTokenizer:
         conll_style=True,
         column: Optional[str] = None,
     ):
-                
+        
         series = standardize_text_input(texts, column)
         all_tokens = series.apply(self._tokenize_one).tolist()
 
@@ -41,32 +39,29 @@ class MyanmarWordTokenizer:
 
         return all_tokens if return_list else [separator.join(toks) for toks in all_tokens]
     
-    def _syllable_break(self, text: str) -> list:
-        result = BREAK_PATTERN.sub(r'|\1', text)
-        if result.startswith('|'):
-            result = result[1:]
-        return result.split('|')
-
     def _tokenize_one(self, text: str) -> List[str]:
         if self.protect_pattern:
-            tokens, protected = preprocess_burmese_text(text)
+            phrase_tokens, protected = preprocess_burmese_text(text)     
             final_tokens = []
-            for tok in tokens:
-                if tok in protected:  # protected span → single token
-                    final_tokens.append(protected[tok])
+            for phrase_tok in phrase_tokens:
+                print(phrase_tok)
+                if phrase_tok in protected:  # protected span → single token
+                    final_tokens.append(protected[phrase_tok])
                 else:  # normal segmentation
-                    segged = self._segment_and_refine(tok)
+                    segged = rule_segment(phrase_tok)
                     final_tokens.extend(segged)
             return final_tokens
         else:
-            return self._segment_and_refine(text)
+            segged = rule_segment(text)
+            final_tokens = list(segged.keys())
+            return final_tokens
 
+
+    """
     def _segment_and_refine(self, text: str) -> List[str]:
-        return [""]
-        """
-        text = preprocess_text(text, self.space_remove_mode)
-        syllables = self._syllable_break(text)
-
+        #syllables = self._syllable_break(text)
+        return list(text)
+        
         # Get segmentation using DAG + BiMM fallback
         dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
         tokens = (
@@ -74,14 +69,14 @@ class MyanmarWordTokenizer:
             if dag
             else [w for (_, _, w) in forward_mm(syllables, self.word_dict, self.max_word_len)]
         )
-
+        
         # Normalize to tokens
         if tokens and isinstance(tokens[0], tuple):
             tokens = [w for (_, _, w) in tokens]
 
         tokens = [t.strip() for t in tokens if t.strip()]
         return refine_tokens(tokens)
-        """
+    
 
     def _choose_segmentation(self, syllables: list) -> list:
         dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
@@ -95,3 +90,10 @@ class MyanmarWordTokenizer:
             result.append((i, i + len(tok), tok))
             i += len(tok)
         return result
+
+    def _syllable_break(self, text: str) -> list:
+        result = BREAK_PATTERN.sub(r'|\1', text)
+        if result.startswith('|'):
+            result = result[1:]
+        return result.split('|')
+    """
