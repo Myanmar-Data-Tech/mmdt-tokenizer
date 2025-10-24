@@ -1,6 +1,6 @@
 import re
 from typing import List, Dict
-from ..patterns import PUNCT_PATTERN, DIGITS, BURMESE_LETTERS
+from ..utils.patterns import PUNCT_PATTERN, MYANMAR_DIGIT, MYANMAR_LETTER
 
 def split_punct(text: str, protected: Dict[str, str]) -> List[str]:
     tokens = []
@@ -12,5 +12,5 @@ def split_punct(text: str, protected: Dict[str, str]) -> List[str]:
     return tokens
 
 def separate_letters_digits(text: str) -> str:
-    text = re.sub(fr'(?<=[{BURMESE_LETTERS}A-Za-z])(?=[{DIGITS}])', ' ', text)
-    return re.sub(fr'(?<=[{DIGITS}])(?=[{BURMESE_LETTERS}A-Za-z])', ' ', text)
+    text = re.sub(fr'(?<=[{MYANMAR_LETTER}A-Za-z])(?=[{MYANMAR_DIGIT}])', ' ', text)
+    return re.sub(fr'(?<=[{MYANMAR_DIGIT}])(?=[{MYANMAR_LETTER}A-Za-z])', ' ', text)

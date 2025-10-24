@@ -1,5 +1,5 @@
 from typing import List
-from ..constants import NUMBER_PATTERN
+from ..utils.constants import NUMBER_PATTERN
 
 def merge_numbers(tokens: List[str]) -> List[str]:
     """Merge consecutive numeric tokens (Myanmar/English digits, commas, dots)."""

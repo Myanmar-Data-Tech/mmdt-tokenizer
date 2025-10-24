@@ -1,5 +1,5 @@
 import pytest
-from src.mmdt_tokenizer.core import MyanmarTokenizer
+from mmdt_tokenizer.tokenzier.core import MyanmarTokenizer
 
 @pytest.fixture(scope="module")
 def tokenizer():

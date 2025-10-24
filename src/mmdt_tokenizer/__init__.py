@@ -1,3 +1,3 @@
-from .core import MyanmarTokenizer
+from .tokenzier.core import MyanmarTokenizer
 
 __all__ = ["MyanmarTokenizer"]

@@ -1,9 +1,10 @@
 import re
 import pandas as pd
 from typing import List, Union, Optional
-from .csv_utils import save_tokens_to_csv
-from .data_utils import standardize_text_input
-from .constants import SYLLABLE_BREAK_PATTERN
+
+from ..utils.data_utils import standardize_text_input
+from ..utils.csv_utils import save_tokens_to_csv
+from ..utils.patterns import SYLLABLE_BREAK_PATTERN
 
 
 class MyanmarSyllableTokenizer:

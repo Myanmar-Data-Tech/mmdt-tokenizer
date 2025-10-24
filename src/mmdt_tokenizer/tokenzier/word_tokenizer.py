@@ -1,11 +1,11 @@
 import pandas as pd
 from typing import List, Union, Optional
 
-from .data_utils import standardize_text_input
-from .csv_utils import save_tokens_to_csv
-from mmdt_tokenizer.preprocessing import preprocess_burmese_text
-
+from ..utils.data_utils import standardize_text_input
+from ..utils.csv_utils import save_tokens_to_csv
 from .rule_segmenter import rule_segment
+
+from mmdt_tokenizer.preprocessing import preprocess_burmese_text
 
 class MyanmarWordTokenizer:
     """Word-level tokenizer for Myanmar text."""
@@ -44,56 +44,15 @@ class MyanmarWordTokenizer:
             phrase_tokens, protected = preprocess_burmese_text(text)     
             final_tokens = []
             for phrase_tok in phrase_tokens:
-                print(phrase_tok)
                 if phrase_tok in protected:  # protected span → single token
                     final_tokens.append(protected[phrase_tok])
-                else:  # normal segmentation
+                else:  # rule-based segmentation
                     segged = rule_segment(phrase_tok)
                     final_tokens.extend(segged)
             return final_tokens
-        else:
-            segged = rule_segment(text)
-            final_tokens = list(segged.keys())
+        else: # rule-based segmentation
+            final_tokens = rule_segment(text)
             return final_tokens
 
 
-    """
-    def _segment_and_refine(self, text: str) -> List[str]:
-        #syllables = self._syllable_break(text)
-        return list(text)
-        
-        # Get segmentation using DAG + BiMM fallback
-        dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
-        tokens = (
-            viterbi(syllables, dag, self.bimm_boost, self.word_dict, self.dict_weight)
-            if dag
-            else [w for (_, _, w) in forward_mm(syllables, self.word_dict, self.max_word_len)]
-        )
-        
-        # Normalize to tokens
-        if tokens and isinstance(tokens[0], tuple):
-            tokens = [w for (_, _, w) in tokens]
 
-        tokens = [t.strip() for t in tokens if t.strip()]
-        return refine_tokens(tokens)
-    
-
-    def _choose_segmentation(self, syllables: list) -> list:
-        dag = build_dag(syllables, self.max_word_len, self.word_dict, self.use_bimm_fallback)
-
-        tokens = viterbi(syllables, dag, self.bimm_boost, self.word_dict, self.dict_weight) if dag else \
-                [w for (_, _, w) in forward_mm(syllables, self.word_dict, self.max_word_len)]
-
-        result = []
-        i = 0
-        for tok in tokens:
-            result.append((i, i + len(tok), tok))
-            i += len(tok)
-        return result
-
-    def _syllable_break(self, text: str) -> list:
-        result = BREAK_PATTERN.sub(r'|\1', text)
-        if result.startswith('|'):
-            result = result[1:]
-        return result.split('|')
-    """

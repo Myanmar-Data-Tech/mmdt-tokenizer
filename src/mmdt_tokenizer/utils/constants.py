@@ -1,30 +1,17 @@
-import re
+import os
+from pathlib import Path
 
-PUNCT_PATTERN = re.compile(r'([\u104A\u104B.,;:\-\(\)\[\]\{\}%/\\\u2010-\u2015])')
-PROTECTED_SPLIT_PATTERN = re.compile(r'(\x02PROT[A-Z]+\x03)')
+# === File Paths ===
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR =  PROJECT_ROOT /  "data"
+OUTPUT_DIR = PROJECT_ROOT /  "result"
 
-PROTECT_PATTERNS = [
-    re.compile(r'([A-Za-z0-9\u1040-\u1049._%+\-]+)\s*@\s*([A-Za-z0-9.\-]+)(?:\.[A-Za-z]{2,})?'),
-    re.compile(r'https?://[^\s]+|www\.[^\s]+'),
-    re.compile(r'@@?[A-Za-z0-9_]+'),
-    re.compile(r'\b(?:[A-Za-z]\s*\.){2,}[A-Za-z]?\b'),
-    re.compile(r'\b(?:Ph\.D|Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\b'),
-    re.compile(r'(?:[က-အ]\s*\.){2,}[က-အ]?'),
-    re.compile(r'(?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{2,4})'),
-    re.compile(r'(?:[0-9\u1040-\u1049]{1,2}):(?:[0-9\u1040-\u1049]{2})(?::(?:[0-9\u1040-\u1049]{2}))?'),
-    re.compile(r'(?:[0-9\u1040-\u1049]+\.[0-9\u1040-\u1049]+)'),
-    re.compile(r'[0-9\u1040-\u1049]+/[0-9\u1040-\u1049]+'),
-    re.compile(r'(?:\+?95|09|၀၉)[\s\-]?(?:[0-9\u1040-\u1049][\s\-]?){6,}'),
-    re.compile(r'[0-9\u1040-\u1049]+(?:[,.][0-9\u1040-\u1049]+)+'),
-    re.compile(r'[0-9\u1040-\u1049]{2,}'),
-    re.compile(r"\b\w+'[a-zA-Z]+\b"),
-]
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-DIGITS = r'0-9\u1040-\u1049'
-BURMESE_LETTERS = r'\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF\u102B-\u103F\u1037\u1039'
 
-# Post-postional Particles
-# Notes: In Myanmar, preposition come after not before, so should be called post position
+DICT_FILE_PATH = DATA_DIR / "myg2p_mypos.dict" # FIXMED - NOT USE
+
 PARTICLES = ['ကို', 'က', 'မှ', 'မှာ', 'ထဲမှာ', 'ထဲက', 'နဲ့', 'ရဲ့', 'နှင့်', 'တွင်', 'အား', 'သာ',
              'လောက်', 'ပဲ', 'မိန့်', 'ကြ', 'လား', 'တယ်', 'မယ်', 'သည်','မလား', 'လည်း', 'ပါ', 'နော်', 'ခင်ဗျာ', 
              'ဗျာ', 'ရှင်', 'ဖြစ်ပြီး', 'ပြီးတော့', 'နောက်ပြီး', 'ပြီးနောက်', 'ကြောင့်', 'အတွက်', 'ဆိုတော့', 'လို့', 'ဖြစ်လို့', 'တဲ့အတွက်', 
@@ -34,4 +21,13 @@ SUFFIXES = ['များ', 'တွေ', 'လေး', 'ကောင်', 'သာ
 PREFIXES = ["တိုင်း", "တိုင်းဒေသကြီး","နေပြည်တော်"]
 
 CLAUSE_MARKERS = ['နောက်ပြီး', 'ပြီးနောက်', 'ဖို့အတွက်', 'ဖြစ်ပြီး', 'ပြီးတော့', 'ဖြစ်လို့', 'တဲ့အတွက်', 'သော်လည်း', 'ကြောင့်', 'ဆိုတော့', 'ပေမယ့်', 'အတွက်', 'ပေမဲ့', 'လျှင်', 'လို့', 'ဖို့', 'ရင်', 'ပါက']
-CLAUSE_MARKERS_RE = re.compile("|".join(map(re.escape, CLAUSE_MARKERS)))
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
 from pathlib import Path
-from .constants import DICT_FILE_PATH
+from ..utils.constants import DICT_FILE_PATH
 from .word_tokenizer import MyanmarWordTokenizer
 from .syllable_tokenizer import MyanmarSyllableTokenizer
 

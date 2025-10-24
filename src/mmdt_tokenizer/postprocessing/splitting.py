@@ -1,6 +1,6 @@
 import re
 from typing import List
-from ..patterns import PUNCT_PATTERN, PROTECTED_SPLIT_PATTERN
+from ..utils.patterns import PUNCT_PATTERN, PROTECTED_SPLIT_PATTERN
 
 def split_punctuation(tokens: List[str]) -> List[str]:
     """Split standalone punctuation, keeping numbers intact."""
