@@ -4,7 +4,6 @@ from typing import List, Union, Optional
 from ..utils.data_utils import standardize_text_input
 from ..utils.csv_utils import save_tokens_to_csv
 from ..rule_segmenter.engine import rule_segment
-
 from ..preprocessing import preprocess_burmese_text
 from .syllable_tokenizer import MyanmarSyllableTokenizer
 
@@ -40,8 +39,7 @@ class MyanmarWordTokenizer:
         all_tokens = series.apply(self._tokenize_one).tolist()
 
         if save_csv:
-            flat = [tok for sublist in all_tokens for tok in sublist] if len(all_tokens) > 1 else all_tokens[0]
-            save_tokens_to_csv(flat, save_csv, conll_style)
+            save_tokens_to_csv(all_tokens, save_csv, conll_style)
 
         return all_tokens if return_list else [separator.join(toks) for toks in all_tokens]
     

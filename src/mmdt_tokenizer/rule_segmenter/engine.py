@@ -15,21 +15,22 @@ TRIE_NEGR  = build_trie(NEG_SUFFIX)
 TRIE_MONTH = build_trie(MONTHS)
 TRIE_UNIT  = build_trie(CL)
 TRIE_PRN   = build_trie(PRN)
-TRIE_PRN   = build_trie(REGION)
+TRIE_REGION   = build_trie(REGION)
 
 
 
 PIPELINE = [
+    (TRIE_PRN,  "PRN"),
+    (TRIE_REGION,  "REGION"),
+    (TRIE_MONTH, "MONTH"),
+    (TRIE_UNIT,  "CL"),
     (TRIE_CONJ,  "CONJ"),
     (TRIE_POST,  "POSTP"),
     (TRIE_SFP,   "SFP"),
     (TRIE_AUX,   "AUX"),
     (TRIE_NEGP,  "NEG"),
     (TRIE_NEGR,  "NEG_CLITIC"),
-    (TRIE_MONTH, "MONTH"),
-    (TRIE_UNIT,  "CL"),
-    (TRIE_PRN,  "PRN"),
-    (TRIE_PRN,  "REGION"),
+
 ]
 
 def _flatten_if_nested(syl_tokens):
