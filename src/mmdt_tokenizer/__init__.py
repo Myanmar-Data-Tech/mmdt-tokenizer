@@ -1,3 +1,6 @@
-from .tokenzier.core import MyanmarTokenizer
+# __init__.py
+from .core import MyanmarTokenizer
+from .tokenizer.word_tokenizer import MyanmarWordTokenizer
+from .tokenizer.syllable_tokenizer import MyanmarSyllableTokenizer
 
-__all__ = ["MyanmarTokenizer"]
+__all__ = ["MyanmarTokenizer", "MyanmarWordTokenizer", "MyanmarSyllableTokenizer"]

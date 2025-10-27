@@ -7,7 +7,9 @@ A Myanmar text tokenizer library (“mmdt-tokenizer”) for word- and syllable-l
 
 - Normalize Myanmar text (remove unwanted spaces, support space removal modes)  
 - Tokenize into syllables  
-- Tokenize into words using forward/backward maximum matching + dictionary fallback  
+- Protection (FIXED ME: NW)
+- Tokenize into words using grammar-rules
+- Tokenize into words using (FIXED ME:) (forward/backward maximum matching + dictionary fallback)  
 - Post-process: merge/split number tokens, split English words & punctuation  
 - Optionally save tokenization results to CSV  
 
@@ -19,21 +21,34 @@ This library draws inspiration from the [oppaWord: Myanmar Word Segmenter](https
 
 ---
 ## Folder Structure
+```
+MMDT-TOKENIZER/
+├─ pyproject.toml
+├─ src/
+│  └─ mmdt_tokenizer/
+│     ├─ __init__.py
+│     ├─ tokenizer/            
+│     │  ├─ __init__.py
+│     │  └─ core.py              ← defines MyanmarTokenizer
+|     |  └─ syllable_tokenizer.py ← syllabus-based tokenizer
+|     |  └─ word_tokenizer.py ← word-based tokenizer
+|     |  └─ rule_segementer.py ← rule-based segmenter for word tokenization
+│     ├─ utils/
+│     │  ├─ __init__.py
+│     │  ├─ constants.py
+│     │  ├─ patterns.py
+│     │  ├─ matching.py
+│     │  ├─ chunking.py
+│     │  └─ token_ops.py
+│     ├─ preprocessing/
+│     ├─ postprocessing/
+│     ├─ data/
+│     ├─ result/
+│     └─ tests/
+├─ .venv/                         
+└─ README.md
 
-- `LICENSE` — license file (MIT)  
-- `pyproject.toml` — project metadata & build config  
-- `data/myg2p_mypos.dict` - dictionary file compiled from oppaword
-- `src/mmdt_tokenizer/` — the main library package  
-  - `constants.py` — regexes, unicode letter/digit classes etc.  
-  - `preprocess.py` — text cleanup, space removal  
-  - `segment.py` — word segmentation logic (forward/backward matching)  
-  - `postprocess.py` — refining tokens (number merging, splitting, English)  
-  - `csv_utils.py` — save token outputs to CSV  
-  - `word_tokenizer.py` — word-level tokenizer class  
-  - `syllable_tokenizer.py` — syllable-level tokenizer class  
-  - `core.py` — facade class `MyanmarTokenizer` that wraps the above  
-- `tests/` — unit tests  
-
+```
 ---
 
 ## Installation

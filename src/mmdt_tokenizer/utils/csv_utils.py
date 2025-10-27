@@ -23,6 +23,7 @@ def save_tokens_to_csv(tokens: Union[List[str], List[List[str]]], save_csv: str,
                 rows.append("")
         pd.DataFrame({"token": rows}).to_csv(save_csv, index=False, encoding="utf-8-sig")
     else:
+        
         df_rows = pd.DataFrame(sublists)
         df_rows.columns = [f"Token_{i+1}" for i in range(df_rows.shape[1])]
         df_rows.to_csv(save_csv, index=False, encoding="utf-8-sig")

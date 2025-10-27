@@ -1,6 +1,5 @@
 from .preprocess import preprocess_burmese_text
-from .cleaning import collapse_digit_spaces
-from .tokenization import split_punct, separate_letters_digits
+from .normalizer import split_punct, separate_letters_digits, collapse_digit_spaces
 
 __all__ = [
     "preprocess_burmese_text",

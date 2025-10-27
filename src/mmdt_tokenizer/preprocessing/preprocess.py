@@ -2,10 +2,10 @@ import re
 import unicodedata
 from typing import Tuple, Dict, List
 
-from .helpers import _int_to_letters
-from .tokenization import split_punct, separate_letters_digits
-from .cleaning import collapse_digit_spaces, remove_punct_outside_protected
-from .protection import protect_patterns
+from ..utils.text_utils import _int_to_letters
+from .normalizer import split_punct, separate_letters_digits, collapse_digit_spaces
+from .cleaner import remove_punct_outside_protected
+from .protector import protect_patterns
 
 def preprocess_burmese_text(text: str) -> Tuple[List[str], Dict[str, str]]:
     if not isinstance(text, str):
