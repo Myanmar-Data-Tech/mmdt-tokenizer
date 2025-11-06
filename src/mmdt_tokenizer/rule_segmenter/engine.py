@@ -43,7 +43,6 @@ def _flatten_if_nested(syl_tokens):
 def rule_segment(text: str, get_syllabus) -> List[str]:
     # 1) syllables
     tokens: List[str] = _flatten_if_nested(get_syllabus(text))
-
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -56,7 +55,6 @@ def rule_segment(text: str, get_syllabus) -> List[str]:
             chunks.append(m); i = m.span[1] + 1
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
-
     # 3) structural merges
     chunks = merge_num_classifier(chunks)
     chunks = merge_predicate(chunks)

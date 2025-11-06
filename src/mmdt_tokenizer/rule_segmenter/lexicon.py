@@ -111,6 +111,8 @@ POSTP = {
 }
 
 
+
+
 # --- Sentence-final particles ---
 SFP = {
     ("တယ်",): "SFP",
