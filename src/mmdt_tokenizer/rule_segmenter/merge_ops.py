@@ -6,15 +6,17 @@ import re
 def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
     out: List[Chunk] = []
     i = 0
-    while i < len(chunks):
+    n = len(chunks)
+    while i < n:
         c = chunks[i]
-        if c.tag == "RAW" and c.text.isdigit():
+        print(c)
+        if c.tag == "NUM":
             if i+1 < len(chunks) and chunks[i+1].tag == "CL":
-                
                 start = c.span[0]; end = chunks[i+1].span[1]
                 out.append(Chunk((start,end), c.text + chunks[i+1].text, "NUMCL"))
                 i += 2; continue
         out.append(c); i += 1
+    print("end")
     return out
 
 def merge_predicate(chunks: List[Chunk]) -> List[Chunk]:

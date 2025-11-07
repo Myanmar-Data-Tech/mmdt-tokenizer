@@ -6,8 +6,12 @@ def build_trie(patterns: Dict[Tuple[str, ...], str]) -> dict:
     root = {}
     for seq, tag in patterns.items():
         node = root
-        for s in seq:
-            node = node.setdefault(s, {})
+        if(type(seq) is tuple):
+            for s in seq:
+                node = node.setdefault(s, {})
+        else:
+            node = node.setdefault(seq,{})
+                
         node["_END_"] = tag
     return root
 
@@ -20,11 +24,16 @@ def scan_longest_at(tokens: List[str], i: int, pipeline: List[tuple]) -> Optiona
     if tokens[i] in SKIP:
         return None
 
-    best = None  # (end, tag, text)
     n = len(tokens)
+    best_end: Optional[int] = None
+    best_tag: Optional[str] = None
+    best_text: Optional[str] = None
+
     for trie, tag_override in pipeline:
         node = trie
-        j = i; last_end = None; last_tag = None
+        j = i
+        last_end: Optional[int] = None
+        last_tag: Optional[str] = None
         while j < n:
             t = tokens[j]
             if t in SKIP or t not in node:
@@ -33,9 +42,17 @@ def scan_longest_at(tokens: List[str], i: int, pipeline: List[tuple]) -> Optiona
             if "_END_" in node:
                 last_end = j - 1
                 last_tag = tag_override or node["_END_"]
-        if last_end is not None and (best is None or last_end > best[0]):
-            best = (last_end, last_tag, "".join(tokens[i:last_end+1]))
-    if best is None:
+
+        if last_end is not None and last_tag is not None:
+            if best_end is None or last_end > best_end:
+                best_end = last_end
+                best_tag = last_tag
+                best_text = "".join(tokens[i:last_end + 1])
+    
+    if best_end is None:
         return None
-    end, tag, text = best
-    return Chunk(span=(i, end), text=text, tag=tag)
+    assert best_tag is not None
+    assert best_text is not None
+
+    return Chunk(span=(i, best_end), text=best_text, tag=best_tag)
+   

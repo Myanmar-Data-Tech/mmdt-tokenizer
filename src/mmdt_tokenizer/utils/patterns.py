@@ -64,5 +64,7 @@ PROTECT_SPACES = [
 # Precompiled regex patterns 
 PUNCT_PATTERN = re.compile(r'([\u104A\u104B.,;:\-\(\)\[\]\{\}%/\\\u2010-\u2015])') 
 NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$') # Numbers (English or Myanmar digits, with , or .)
+WORD_NUM_PATTERN = re.compile(r'(?<![\u1000-\u1021\u102B-\u103E])(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနှစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သောင်း|သန်း)(?:[\u102B-\u103E]*)(?![\u1000-\u1021\u102B-\u103E])')
+PHONE_NUM_PATTERN = re.compile(r'(?:\+?95|09|၀၉)[\s\-]?(?:[0-9\u1040-\u1049][\s\-]?){6,}')
 PROTECTED_SPLIT_PATTERN = re.compile(r'(\x02PROT[A-Z]+\x03)') 
 
