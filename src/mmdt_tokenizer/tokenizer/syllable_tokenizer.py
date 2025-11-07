@@ -23,7 +23,6 @@ class MyanmarSyllableTokenizer:
     ):
         series = standardize_text_input(texts, column)
         all_syllables = series.apply(self._break_one).tolist()
-
         if save_csv:
             save_tokens_to_csv(all_syllables, save_csv, conll_style)
 
