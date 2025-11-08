@@ -24,4 +24,4 @@ def collapse_to_phrases(chunks: List[Chunk], FUNCTION_TAGS) -> List[str]:
         else:
             buf.append(txt)
     flush()
-    return [t for t in surface if t not in SKIP]
+    return [t.strip().replace(" ","") for t in surface if t not in SKIP]

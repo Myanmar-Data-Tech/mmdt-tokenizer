@@ -4,8 +4,8 @@ from .lexicon import SKIP
 from .lexicon import CONJ, POSTP, SFP,NEG_PREFIX, NEG_SUFFIX, CL
 from .lexicon import MONTH, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
-from .merge_ops import merge_num_classifier
-from .merge_ops import merge_predicate
+from .merge_ops import merge_num_classifier, merge_predicate, merge_between_boundaries
+from .cleanner import clean_postp_tag, clean_space_chunk
 from .collapse import collapse_to_phrases
 from ..preprocessing import preprocess_burmese_text
 from ..utils.patterns import TAG_PATTERNS
@@ -14,7 +14,6 @@ from ..utils.patterns import TAG_PATTERNS
 TRIE_CONJ  = build_trie(CONJ)
 TRIE_POST  = build_trie(POSTP)
 TRIE_SFP   = build_trie(SFP)
-TRIE_NEGP  = build_trie(NEG_PREFIX)
 TRIE_NEGR  = build_trie(NEG_SUFFIX)
 
 TRIE_MONTH = build_trie(MONTH)
@@ -39,7 +38,6 @@ PIPELINE = [
     (TRIE_POST,  "POSTP"),
     (TRIE_UNIT,  "CL"),   
     (TRIE_SFP,   "SFP"),
-    (TRIE_NEGP,  "NEG"),
     (TRIE_NEGR,  "NEG_CLITIC"),
 
 ]
@@ -88,14 +86,19 @@ def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
             chunks.append(m); i = m.span[1] + 1
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
-
-    # 3) structural merges
-    chunks = merge_num_classifier(chunks)
-    chunks = merge_predicate(chunks)
    
-    # 4) phrase collapse
-    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN', 'CONJ']
-    PHRASE_TAGS = ["PRED", "NUMCL"] 
-    FUNCTION_TAGS = list(TAG_PATTERNS.keys()) + KEY_TAGS + PHRASE_TAGS #['NUM', 'ORG', 'NAME', 'DATE', 'TIME', 'EMAIL', 'URL']
+    
+    # 3) clean 
+    chunks = clean_postp_tag(chunks)
+    chunks = clean_space_chunk(chunks)
+    # 4) structural merges
+    chunks = merge_num_classifier(chunks)
+    chunks = merge_between_boundaries(chunks)
+    chunks = merge_predicate(chunks)
+    
+    # 5) phrase collapse
+    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN', 'CONJ', 'POSTP']
+    PHRASE_TAGS = ["PRED", "NUMCL", "MERGED"] 
+    FUNCTION_TAGS = list(TAG_PATTERNS.keys()) + KEY_TAGS + PHRASE_TAGS #
 
     return collapse_to_phrases(chunks, set(FUNCTION_TAGS))

@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Iterable
 from .types import Chunk
-from .lexicon import FORBID_START
+from .lexicon import FORBID_TAG
 
 
 def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
@@ -16,6 +16,7 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
                 start = chunks[i].span[0]
                 end = chunks[j].span[1]
                 merged_text = "".join(c.text for c in chunks[i:j]) + chunks[j].text
+                merged_text = merged_text.strip().replace(" ","")
                 out.append(Chunk((start, end), merged_text, "NUMCL"))
                 i = j + 1
                 continue
@@ -27,6 +28,70 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
         out.append(chunks[i])
         i += 1
     return out
+
+def merge_between_boundaries(chunks: List["Chunk"]) -> List["Chunk"]:
+    """
+    Merge runs of non-forbidden chunks that lie strictly between ANY two boundary chunks,
+    where each boundary's pos is in `boundary_values` (e.g., {'conj','postp'}).
+
+    - Keeps boundary chunks as-is (both ends).
+    - Inside each boundary-delimited window, concatenates consecutive eligible chunks.
+    - Any chunk with a forbidden tag is NOT merged and splits the run.
+    - Everything outside boundary windows is passed through unchanged.
+
+    Supported windows include conj...postp, postp...conj, postp...postp, conj...conj.
+    """
+    boundary_values: Iterable[str] = ("CONJ", "POSTP")
+    merged_tag: str = "MERGED"
+    boundary_values = set(boundary_values)
+
+    out: List["Chunk"] = []
+    i = 0
+    n = len(chunks)
+
+    while i < n and chunks[i].tag not in boundary_values:
+        out.append(chunks[i])
+        i += 1
+
+    while i < n:
+        left = chunks[i]
+        out.append(left)  # keep left boundary
+        i += 1
+        
+        run: List["Chunk"] = []
+        while i < n and chunks[i].tag not in boundary_values:
+            ch = chunks[i]
+            if ch.tag in FORBID_TAG:
+                if run:
+                    start = run[0].span[0]
+                    end = run[-1].span[1]
+                    text = "".join(c.text for c in run if c.text)
+                    out.append(Chunk((start, end), text, merged_tag))
+                    run.clear()
+                out.append(ch)
+            else:
+                run.append(ch)
+            i += 1
+
+        # end scanning 
+        if run:
+            start = run[0].span[0]
+            end = run[-1].span[1]
+            text = "".join(c.text for c in run if c.text)
+            out.append(Chunk((start, end), text, merged_tag))
+            run.clear()
+
+        if i < n and chunks[i].tag in boundary_values:
+            out.append(chunks[i])
+            i += 1
+
+        # Copy any non-boundary tail (outside any window)
+        while i < n and chunks[i].tag not in boundary_values:
+            out.append(chunks[i])
+            i += 1
+    return out
+
+
 
 def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
     """
@@ -44,7 +109,7 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
     n = len(chunks)
 
     while i < n:
-        if(chunks[i].tag in FORBID_START):
+        if(chunks[i].tag in FORBID_TAG):
             out.append(chunks[i])
             i+=1
             continue
@@ -72,7 +137,6 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
                 i = j
                 continue
                 
-        # fallback passthrough
         out.append(chunks[i])
         i += 1
 
