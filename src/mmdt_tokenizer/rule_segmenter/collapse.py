@@ -2,9 +2,8 @@ from typing import List
 from .types import Chunk
 from .lexicon import SKIP
 
-FUNCTION_TAGS = {"POSTP","CONJ","SFP","AUX","NEG","NEG_CLITIC","CL","NUMCL","MONTH", "PRN", "REGION"}
 
-def collapse_to_phrases(chunks: List[Chunk]) -> List[str]:
+def collapse_to_phrases(chunks: List[Chunk], FUNCTION_TAGS) -> List[str]:
     surface: List[str] = []
     buf: List[str] = []
 
@@ -17,16 +16,12 @@ def collapse_to_phrases(chunks: List[Chunk]) -> List[str]:
         tag = getattr(ch, "tag", None)
         txt = getattr(ch, "text", "")
 
-        if tag == "PUNCT":
+        if tag == "PUNCT" :
+            flush()
+        if tag in FUNCTION_TAGS:
             flush()
             surface.append(txt)
-        elif tag in FUNCTION_TAGS:
-            flush()
-            surface.append(txt)
-        elif tag == "PRED" or not tag:
-            # accumulate normal syllables into a phrase
-            buf.append(txt)
         else:
             buf.append(txt)
     flush()
-    return [t for t in surface if t]
+    return [t for t in surface if t not in SKIP]

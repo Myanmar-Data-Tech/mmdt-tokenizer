@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List
 
 Span = Tuple[int, int]
 
