@@ -33,14 +33,21 @@ PALI_NAME_PATTERN =  re.compile(r'(?<![\u1000-\u109F])([\u1000-\u109F]*\u1039[\u
 ABB_ORG_PATTERN_1 = re.compile(r'(?:[က-အ]\s*[./-]\s*){2,}[က-အ]?')
 ABB_ORG_PATTERN_2 = re.compile(r'(?<![\u1000-\u1021\u102B-\u103E])([\u1000-\u1021]{2,})(?=[\s.,\-@/!?]|$)')
 ABB_ORG_PATTERN_3 = re.compile(r'\b(?:[A-Za-z]\.?\s*){2,}[A-Za-z]?\b')
-DATE_PATTERN = re.compile(r'(?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{2,4})')
+DATE_PATTERN_01 = re.compile(r'(?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{1,2})[./\-](?:[0-9\u1040-\u1049]{2,4})')
+DATE_PATTERN_02 = re.compile(
+    r'(?:[0-9\u1040-\u1049]+|(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနှစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သိန်း|သန်း)+)\s*(?:ခု(?:နှစ်)?)?\s*'
+    r'(?:ဇန်နဝါရီ|ဖေဖော်ဝါရီ|မတ်|ဧပြီ|မေ|ဇွန်|ဇူလိုင်|ဩဂုတ်|အော်ဂုတ်|စက်တင်ဘာ|အောက်တိုဘာ|နိုဝင်ဘာ|ဒီဇင်ဘာ)\s*(?:လ)?\s*'
+    r'(?:[0-9\u1040-\u1049]+|(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနှစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သိန်း|သန်း)+)\s*(?:ရက်(?:နေ့)?)?',
+    re.UNICODE
+)
 TIME_PATTERN = re.compile(r'(?:[0-9\u1040-\u1049]{1,2}):(?:[0-9\u1040-\u1049]{2})(?::(?:[0-9\u1040-\u1049]{2}))?')
+
 
 TAG_PATTERNS = {
     "NUM": [NUMBER_PATTERN, WORD_NUM_PATTERN, PHONE_NUM_PATTERN],
     "ORG": [ABB_ORG_PATTERN_1, ABB_ORG_PATTERN_2, ABB_ORG_PATTERN_3],
     "NAME": [PER_NAME_PATTERN, PALI_NAME_PATTERN],
-    "DATE": [DATE_PATTERN], 
+    "DATE": [DATE_PATTERN_01, DATE_PATTERN_02], 
     "TIME": [TIME_PATTERN],
     "EMAIL": [EMAIL_PATTERN], 
     "URL": [URL_PATTERN]

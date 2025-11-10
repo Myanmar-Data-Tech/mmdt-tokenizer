@@ -8,7 +8,7 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     If a 'postp' chunk is preceded by punctuation, change its pos to 'raw'.
 
     Preceded-by-punctuation includes:
-      1) previous chunk's is tagged as TAG
+      1) previous chunk's is tagged as POSTP
       2) previous chunk's text ends with punctuation 
       3) the current chunk's text begins with punctuation 
          This covers scripts where punctuation may attach to the token, e.g., Myanmar '၊' '။'.

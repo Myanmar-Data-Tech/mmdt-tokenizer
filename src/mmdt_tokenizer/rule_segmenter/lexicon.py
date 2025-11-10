@@ -167,6 +167,7 @@ SFP = {
     ('ပေါ့', 'လေ'): 'SFP',
     ('ဗျာ'): 'SFP',
     ('မယ်'): 'SFP',
+    ('ဘူး'): 'SFP',
     ('မ', 'လဲ'): 'SFP',
     ('ရှင်'): 'SFP',
     ('လား'): 'SFP',
@@ -978,10 +979,10 @@ REGION = {
 # --- Punctuation / whitespace to skip ---
 SKIP = {" ", "၊", "။", ",", "?", "!"}
 # --- NOT TO MERGE IN NOUNCL /POSTP ---
-FORBID_TAG = {"CONJ", "PUNCT", 
-              "PRED", "NUMCL", "MERGED",
-              'REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN', 'CONJ', 'POSTP',"CL",
-              "POSTP", 'NUM', 'ORG', 'NAME', 'DATE', 'TIME', 'EMAIL', 'URL'}
+FORBID_TAG = {"CONJ", "PUNCT", "CL",
+              "PRED", "MERGED",
+              'REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN',  
+              'NUM', 'ORG', 'NAME', 'DATE', 'TIME', 'EMAIL', 'URL'}
 
 
 

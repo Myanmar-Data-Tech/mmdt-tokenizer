@@ -12,17 +12,12 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
             j = i
             while j < n and chunks[j].tag == "NUM":
                 j += 1
-            if j < n and chunks[j].tag == "CL":
-                start = chunks[i].span[0]
-                end = chunks[j].span[1]
-                merged_text = "".join(c.text for c in chunks[i:j]) + chunks[j].text
-                merged_text = merged_text.strip().replace(" ","")
-                out.append(Chunk((start, end), merged_text, "NUMCL"))
-                i = j + 1
-                continue
-            
-            out.extend(chunks[i:j])
-            i = j
+            start = chunks[i].span[0]
+            end = chunks[j-1].span[1]
+            merged_text = "".join(c.text for c in chunks[i:j])
+            merged_text = merged_text.strip().replace(" ","")
+            out.append(Chunk((start, end-1), merged_text, "NUM"))
+            i = j 
             continue
         
         out.append(chunks[i])
@@ -115,8 +110,8 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
             continue
         j = i
         if j < n and chunks[j].tag == "NEG":    j += 1
-        if j < n and chunks[j].tag in ("RAW", "POSTP"):
-            while j < n and chunks[j].tag in ("RAW", "POSTP"):j += 1
+        if j < n and chunks[j].tag in ("RAW"):
+            while j < n and chunks[j].tag in ("RAW"):j += 1
            # SFP (one or more) — require at least one
             had_sfp = False
             while j < n and chunks[j].tag == "SFP":

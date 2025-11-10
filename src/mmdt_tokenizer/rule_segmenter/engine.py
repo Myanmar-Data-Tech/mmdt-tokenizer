@@ -14,14 +14,14 @@ from ..utils.patterns import TAG_PATTERNS
 TRIE_CONJ  = build_trie(CONJ)
 TRIE_POST  = build_trie(POSTP)
 TRIE_SFP   = build_trie(SFP)
-TRIE_NEGR  = build_trie(NEG_SUFFIX)
+TRIE_UNIT  = build_trie(CL)
 
 TRIE_MONTH = build_trie(MONTH)
 TRIE_REGION   = build_trie(REGION)
 TRIE_REG   = build_trie(REG)
 TRIE_SNOUN  = build_trie(SNOUN)
 TRIE_TITLE   = build_trie(TITLE)
-TRIE_UNIT  = build_trie(CL)
+
 TRIE_PRN   = build_trie(PRN)
 
 
@@ -37,8 +37,7 @@ PIPELINE = [
     (TRIE_CONJ,  "CONJ"),
     (TRIE_POST,  "POSTP"),
     (TRIE_UNIT,  "CL"),   
-    (TRIE_SFP,   "SFP"),
-    (TRIE_NEGR,  "NEG_CLITIC"),
+    (TRIE_SFP,   "SFP")
 
 ]
 
@@ -70,7 +69,7 @@ def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
                 tokens.extend(syllable_tokens)
     else:
         tokens = _flatten_if_nested(get_syllabus(text))  
-        
+    
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -87,18 +86,23 @@ def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
    
-    
+
     # 3) clean 
     chunks = clean_postp_tag(chunks)
+    
     chunks = clean_space_chunk(chunks)
+
     # 4) structural merges
+    
     chunks = merge_num_classifier(chunks)
+    
     chunks = merge_between_boundaries(chunks)
+  
     chunks = merge_predicate(chunks)
     
     # 5) phrase collapse
-    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN', 'CONJ', 'POSTP']
-    PHRASE_TAGS = ["PRED", "NUMCL", "MERGED"] 
+    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'PRN', 'CONJ', 'POSTP', 'CL']
+    PHRASE_TAGS = ["PRED", "MERGED"] 
     FUNCTION_TAGS = list(TAG_PATTERNS.keys()) + KEY_TAGS + PHRASE_TAGS #
 
     return collapse_to_phrases(chunks, set(FUNCTION_TAGS))
