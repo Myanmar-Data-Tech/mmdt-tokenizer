@@ -3,6 +3,7 @@ from .types import Chunk
 from .lexicon import FORBID_TAG
 
 
+
 def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
     out: List[Chunk] = []
     i = 0
@@ -10,16 +11,57 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
     while i < n:
         if chunks[i].tag == "NUM":
             j = i
+            start = chunks[i].span[0]
+
             while j < n and chunks[j].tag == "NUM":
                 j += 1
-            start = chunks[i].span[0]
+                       
             end = chunks[j-1].span[1]
             merged_text = "".join(c.text for c in chunks[i:j])
             merged_text = merged_text.strip().replace(" ","")
-            out.append(Chunk((start, end-1), merged_text, "NUM"))
-            i = j 
+
+            has_right_cl = (j < n and chunks[j].tag == "CL")
+
+            # Number followed by classifier
+            if has_right_cl: 
+                out.append(Chunk((start, end), merged_text, "NUM"))
+                cl = chunks[j]
+                out.append(Chunk(cl.span, cl.text, "NUMCL"))
+                i = j + 1
+                continue
+            
+            # multi-token or solitary digit number
+            out.append(Chunk((start, end), merged_text, "NUM"))
+            i = j
             continue
-        
+        elif chunks[i].tag == "WORDNUM":
+            j = i
+            while j < n and chunks[j].tag == "WORDNUM":
+                j += 1
+
+            merged_text = "".join(c.text for c in chunks[i:j]).replace(" ", "")
+            start, end = chunks[i].span[0], chunks[j - 1].span[1]
+
+            # If followed by a classifier → NUMCL
+            if j < n and chunks[j].tag == "CL":
+                out.append(Chunk((start, chunks[j].span[1]), merged_text + chunks[j].text, "NUMCL"))
+                i = j + 1
+                continue
+
+            # If only a single wordnum (solitary) → downgrade to RAW /CL
+            if j - i == 1:
+                if merged_text == "နှစ်": 
+                    out.append(Chunk((start, end), merged_text, "CL"))
+                else:
+                    out.append(Chunk((start, end), merged_text, "RAW"))
+                i = j
+                continue
+
+            # Multi-word number → NUM
+            out.append(Chunk((start, end), merged_text, "NUM"))
+            i = j
+            continue
+        # the rest
         out.append(chunks[i])
         i += 1
     return out
@@ -117,14 +159,9 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
             while j < n and chunks[j].tag == "SFP":
                 had_sfp = True
                 j += 1
-            # optional neg ending
-            had_neg_end = False
-            if j < n and chunks[j].tag == "NEG_CLITIC": 
-                had_neg_end = True
-                j += 1
-            
-            if had_sfp or had_neg_end:
-                if j < n and chunks[j].tag == "PUNCT": j += 1
+              
+            if had_sfp:
+                # if j < n and chunks[j].tag == "PUNCT": j += 1
                 start = chunks[i].span[0]
                 end = chunks[j - 1].span[1]
                 text = "".join(ch.text for ch in chunks[i:j])

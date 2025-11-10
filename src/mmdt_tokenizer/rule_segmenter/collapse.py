@@ -18,10 +18,15 @@ def collapse_to_phrases(chunks: List[Chunk], FUNCTION_TAGS) -> List[str]:
 
         if tag == "PUNCT" :
             flush()
+            surface.append(txt)
+            continue
+
         if tag in FUNCTION_TAGS:
             flush()
             surface.append(txt)
-        else:
-            buf.append(txt)
+            continue
+        
+        buf.append(txt)
     flush()
-    return [t.strip().replace(" ","") for t in surface if t not in SKIP]
+
+    return [t for t in surface if t]
