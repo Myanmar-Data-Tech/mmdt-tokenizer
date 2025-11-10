@@ -2,6 +2,17 @@ from typing import Dict, Tuple, List, Optional
 from .lexicon import SKIP
 from .types import Chunk
 
+
+def print_trie(node: dict, prefix: str = "", level: int = 0):
+    """Recursively print the trie structure with indentation."""
+    indent = "    " * level
+    for key, child in node.items():
+        if key == "_END_":
+            print(f"{indent}└── [END: {child}]")
+        else:
+            print(f"{indent}├── {key}")
+            print_trie(child, prefix + key, level + 1)
+
 def build_trie(patterns: Dict[Tuple[str, ...], str]) -> dict:
     root = {}
     for seq, tag in patterns.items():

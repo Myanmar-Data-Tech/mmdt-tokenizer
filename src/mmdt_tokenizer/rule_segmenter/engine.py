@@ -1,9 +1,9 @@
 from typing import List
 from .types import Chunk
 from .lexicon import SKIP
-from .lexicon import CONJ, POSTP, SFP,NEG_PREFIX, NEG_SUFFIX, CL
+from .lexicon import CONJ, POSTP, SFP, CL
 from .lexicon import MONTH, PRN, REGION, SNOUN, TITLE, REG
-from .scanner import build_trie, scan_longest_at
+from .scanner import build_trie, scan_longest_at, print_trie
 from .merge_ops import merge_num_classifier, merge_predicate, merge_between_boundaries
 from .cleanner import clean_postp_tag, clean_space_chunk
 from .collapse import collapse_to_phrases
@@ -21,8 +21,8 @@ TRIE_REGION   = build_trie(REGION)
 TRIE_REG   = build_trie(REG)
 TRIE_SNOUN  = build_trie(SNOUN)
 TRIE_TITLE   = build_trie(TITLE)
-
 TRIE_PRN   = build_trie(PRN)
+
 
 
 PIPELINE = [
