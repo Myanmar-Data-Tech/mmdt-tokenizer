@@ -132,13 +132,12 @@ def merge_between_boundaries(chunks: List["Chunk"]) -> List["Chunk"]:
 
 def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
     """
-    Merge: (RAW, POSTP)+  +  SFP (one or more, closing)  +  optional PUNCT
+    Merge: (RAW)+  +  SFP (one or more, closing)  +  optional PUNCT
     → single PRED chunk.
 
     Examples:
       RAW, PAR, RAW, SFP              -> PRED
-      PAR, SFP, SFP, PUNCT            -> PRED
-      RAW, RAW, SFP, PUNCT, PUNCT     -> merges up to the first PUNCT only
+      RAW, RAW, SFP, PUNCT            -> merges up to the SFP only, LEFT PUNCT as separte tag
       RAW, PAR, X                     -> unchanged (no SFP after RAW|PAR run)
     """
     out: List["Chunk"] = []

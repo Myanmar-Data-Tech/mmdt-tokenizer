@@ -101,9 +101,8 @@ def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
     chunks = merge_between_boundaries(chunks)
  
     chunks = merge_predicate(chunks)
-    
     # 5) phrase collapse
-    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'CONJ', 'POSTP']
-    PHRASE_TAGS = ["PRED", "MERGED", "NUMCL"] 
+    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'CONJ']
+    PHRASE_TAGS = ["PRED", "MERGED"] 
     FUNCTION_TAGS = list(TAG_PATTERNS.keys()) + KEY_TAGS + PHRASE_TAGS 
     return collapse_to_phrases(chunks, set(FUNCTION_TAGS))

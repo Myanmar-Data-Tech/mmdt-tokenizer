@@ -16,7 +16,7 @@ def collapse_to_phrases(chunks: List[Chunk], FUNCTION_TAGS) -> List[str]:
         tag = getattr(ch, "tag", None)
         txt = getattr(ch, "text", "")
 
-        if tag == "PUNCT" :
+        if tag in ("PUNCT", "POSTP") :
             flush()
             surface.append(txt)
             continue
