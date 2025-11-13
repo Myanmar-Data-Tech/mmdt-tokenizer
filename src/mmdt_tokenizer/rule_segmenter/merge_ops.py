@@ -1,6 +1,6 @@
 from typing import List, Iterable
 from .types import Chunk
-from .lexicon import FORBID_TAG
+from .lexicon import FUN_TAG
 
 
 
@@ -98,7 +98,7 @@ def merge_between_boundaries(chunks: List["Chunk"]) -> List["Chunk"]:
         run: List["Chunk"] = []
         while i < n and chunks[i].tag not in boundary_values:
             ch = chunks[i]
-            if ch.tag in FORBID_TAG:
+            if ch.tag in FUN_TAG:
                 if run:
                     start = run[0].span[0]
                     end = run[-1].span[1]
@@ -130,45 +130,94 @@ def merge_between_boundaries(chunks: List["Chunk"]) -> List["Chunk"]:
 
 
 
-def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
-    """
-    Merge: (RAW)+  +  SFP (one or more, closing)  +  optional PUNCT
-    → single PRED chunk.
+# def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
+#     """
+#     Merge: (RAW)+  +  SFP (one or more, closing)  +  optional PUNCT
+#     → single PRED chunk.
 
-    Examples:
-      RAW, PAR, RAW, SFP              -> PRED
-      RAW, RAW, SFP, PUNCT            -> merges up to the SFP only, LEFT PUNCT as separte tag
-      RAW, PAR, X                     -> unchanged (no SFP after RAW|PAR run)
-    """
-    out: List["Chunk"] = []
-    i = 0
-    n = len(chunks)
+#     Examples:
+#       RAW, PAR, RAW, SFP              -> PRED
+#       RAW, RAW, SFP, PUNCT            -> merges up to the SFP only, LEFT PUNCT as separte tag
+#       RAW, PAR, X                     -> unchanged (no SFP after RAW|PAR run)
+#     """
+#     out: List["Chunk"] = []
+#     i = 0
+#     n = len(chunks)
 
-    while i < n:
-        if(chunks[i].tag in FORBID_TAG):
-            out.append(chunks[i])
-            i+=1
-            continue
-        j = i
-        if j < n and chunks[j].tag == "NEG":    j += 1
-        if j < n and chunks[j].tag in ("RAW"):
-            while j < n and chunks[j].tag in ("RAW"):j += 1
-           # SFP (one or more) — require at least one
-            had_sfp = False
-            while j < n and chunks[j].tag == "SFP":
-                had_sfp = True
-                j += 1
+#     while i < n:
+#         if(chunks[i].tag in FORBID_TAG):
+#             out.append(chunks[i])
+#             i+=1
+#             continue
+#         j = i
+#         if j < n and chunks[j].tag == "NEG":    j += 1
+#         if j < n and chunks[j].tag in ("RAW"):
+#             while j < n and chunks[j].tag in ("RAW"):j += 1
+#            # SFP (one or more) — require at least one
+#             had_sfp = False
+#             while j < n and chunks[j].tag == "SFP":
+#                 had_sfp = True
+#                 j += 1
               
-            if had_sfp:
-                # if j < n and chunks[j].tag == "PUNCT": j += 1
-                start = chunks[i].span[0]
-                end = chunks[j - 1].span[1]
-                text = "".join(ch.text for ch in chunks[i:j])
-                out.append(Chunk((start, end), text, "PRED"))
+#             if had_sfp:
+#                 # if j < n and chunks[j].tag == "PUNCT": j += 1
+#                 start = chunks[i].span[0]
+#                 end = chunks[j - 1].span[1]
+#                 text = "".join(ch.text for ch in chunks[i:j])
+#                 out.append(Chunk((start, end), text, "PRED"))
+#                 i = j
+#                 continue
+                
+#         out.append(chunks[i])
+#         i += 1
+
+#     return out
+
+
+def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
+    n = len(chunks)
+    i = n - 1
+    out = []
+    max_phrase_length = 5
+    while i >= 0:
+        if(chunks[i].tag in FUN_TAG):
+            out.append(chunks[i])
+            i-=1
+            continue
+        if chunks[i].tag == "SFP":
+            j = i
+            raw_indexs = []
+            neg_index = None
+            while j >= 0 and chunks[j].tag in ("SFP", "VEP", "RAW"): 
+                if chunks[j].tag == "RAW": raw_indexs.append(j)
+                if chunks[j].text == "မ" and neg_index is None: neg_index = j
+                j -= 1
+            pred_length = i - j
+            if pred_length > 0 :
+                start = chunks[j + 1].span[0]
+                end = chunks[i].span[1]
+                text = "".join(ch.text for ch in chunks[j + 1 : i + 1])
+                is_neg_end = (chunks[i].text =="ဘူး")
+                if neg_index is not None and is_neg_end: 
+                    text = "".join(ch.text for ch in chunks[neg_index : i + 1])           
+                    out.append(Chunk((neg_index, end), text, "PRED"))
+                    text = "".join(ch.text for ch in chunks[j + 1 : neg_index])
+                    out.append(Chunk((start, neg_index), text, "RAW"))
+                elif pred_length > max_phrase_length and len(raw_indexs)>0:
+                    raw_index = raw_indexs[0]
+                    text = "".join(ch.text for ch in chunks[raw_index+1 : i + 1])           
+                    out.append(Chunk((raw_index, end), text, "PRED"))
+                    text = "".join(ch.text for ch in chunks[j + 1 : raw_index + 1])
+                    out.append(Chunk((start, raw_index), text, "RAW"))
+                else:
+                    out.append(Chunk((start, end), text, "PRED"))
+                    
                 i = j
                 continue
-                
-        out.append(chunks[i])
-        i += 1
+            
 
-    return out
+            
+        out.append(chunks[i])
+        i -= 1
+
+    return out[::-1]

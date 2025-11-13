@@ -29,4 +29,4 @@ def collapse_to_phrases(chunks: List[Chunk], FUNCTION_TAGS) -> List[str]:
         buf.append(txt)
     flush()
 
-    return [t for t in surface if t]
+    return [t for t in surface if t not in SKIP]

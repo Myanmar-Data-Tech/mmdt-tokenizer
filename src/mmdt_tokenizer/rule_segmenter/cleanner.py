@@ -43,3 +43,22 @@ def clean_space_chunk(chunks: List["Chunk"]) -> List["Chunk"]:
             continue
         out.append(ch)
     return out
+
+
+def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
+    out: List["Chunk"] = []
+    n = len(chunks)
+
+    last_non_punct_idx = None
+    for i in reversed(range(n)):
+        ch = chunks[i]
+        if ch.tag not in ("PUNCT",):  
+            last_non_punct_idx = i
+            break
+
+    for i, ch in enumerate(chunks):
+        if i == last_non_punct_idx and ch.tag in ("CONJ", "VEP"):
+            ch.tag = "SFP"
+        out.append(ch)
+
+    return out
