@@ -1,7 +1,36 @@
-from typing import List, Iterable
+from typing import List
 from .types import Chunk
 from .lexicon import FUN_TAG
 
+
+def merge_day_classifier(chunks: List[Chunk]) -> List[Chunk]:
+    out: List[Chunk] = []
+    i = 0
+    n = len(chunks)
+    while i <n:
+        if chunks[i].tag == "DAY":
+            j = i
+            has_right_cl = False
+            while j<n and  chunks[j].tag in ("DAY", "CL", "PUNCT"): 
+                if chunks[j].text in ("နေ့", "ရက်"): has_right_cl = True
+                j +=1
+            start = chunks[i].span[0]
+            end = chunks[min(n,j-1)].span[1]
+            merged_text = "".join(c.text for c in chunks[i:j])
+            merged_text = merged_text.strip().replace(" ", "")
+            
+            if (j<n) and has_right_cl:
+                out.append(Chunk((start, end), merged_text, "DAYCL"))
+                i = j 
+                continue
+
+            out.append(Chunk((start, end), merged_text, "DAY"))
+            i = j
+            continue
+        
+        out.append(chunks[i])
+        i += 1
+    return out
 
 
 def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
@@ -13,20 +42,16 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
             j = i
             start = chunks[i].span[0]
 
-            while j < n and chunks[j].tag == "NUM":
+            while j < n and chunks[j].tag in ("NUM", "PUNCT"):
                 j += 1
                        
-            end = chunks[j-1].span[1]
             merged_text = "".join(c.text for c in chunks[i:j])
             merged_text = merged_text.strip().replace(" ","")
-
-            has_right_cl = (j < n and chunks[j].tag == "CL")
+            end = chunks[j-1].span[1]
 
             # Number followed by classifier
-            if has_right_cl: 
-                out.append(Chunk((start, end), merged_text, "NUM"))
-                cl = chunks[j]
-                out.append(Chunk(cl.span, cl.text, "NUMCL"))
+            if j< n and chunks[j].tag in ("CL", "WORDNUM"):
+                out.append(Chunk((start, chunks[j].span[1]), merged_text + chunks[j].text, "NUMCL"))
                 i = j + 1
                 continue
             
@@ -36,7 +61,7 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
             continue
         elif chunks[i].tag == "WORDNUM":
             j = i
-            while j < n and chunks[j].tag == "WORDNUM":
+            while j < n and chunks[j].tag in ("WORDNUM", "PUNCT"):
                 j += 1
 
             merged_text = "".join(c.text for c in chunks[i:j]).replace(" ", "")
@@ -44,135 +69,19 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
 
             # If followed by a classifier → NUMCL
             if j < n and chunks[j].tag == "CL":
-                out.append(Chunk((start, chunks[j].span[1]), merged_text + chunks[j].text, "NUMCL"))
+                num_cls_text = merged_text + chunks[j].text
+                out.append(Chunk((start, chunks[j].span[1]), num_cls_text, "WNUMCL"))
                 i = j + 1
                 continue
 
-            # If only a single wordnum (solitary) → downgrade to RAW /CL
-            if j - i == 1:
-                if merged_text == "နှစ်": 
-                    out.append(Chunk((start, end), merged_text, "CL"))
-                else:
-                    out.append(Chunk((start, end), merged_text, "RAW"))
-                i = j
-                continue
-
             # Multi-word number → NUM
-            out.append(Chunk((start, end), merged_text, "NUM"))
+            out.append(Chunk((start, end), merged_text, "WORDNUM"))
             i = j
             continue
         # the rest
         out.append(chunks[i])
         i += 1
     return out
-
-def merge_between_boundaries(chunks: List["Chunk"]) -> List["Chunk"]:
-    """
-    Merge runs of non-forbidden chunks that lie strictly between ANY two boundary chunks,
-    where each boundary's pos is in `boundary_values` (e.g., {'conj','postp'}).
-
-    - Keeps boundary chunks as-is (both ends).
-    - Inside each boundary-delimited window, concatenates consecutive eligible chunks.
-    - Any chunk with a forbidden tag is NOT merged and splits the run.
-    - Everything outside boundary windows is passed through unchanged.
-
-    Supported windows include conj...postp, postp...conj, postp...postp, conj...conj.
-    """
-    boundary_values: Iterable[str] = ("CONJ", "POSTP")
-    merged_tag: str = "MERGED"
-    boundary_values = set(boundary_values)
-
-    out: List["Chunk"] = []
-    i = 0
-    n = len(chunks)
-
-    while i < n and chunks[i].tag not in boundary_values:
-        out.append(chunks[i])
-        i += 1
-
-    while i < n:
-        left = chunks[i]
-        out.append(left)  # keep left boundary
-        i += 1
-        
-        run: List["Chunk"] = []
-        while i < n and chunks[i].tag not in boundary_values:
-            ch = chunks[i]
-            if ch.tag in FUN_TAG:
-                if run:
-                    start = run[0].span[0]
-                    end = run[-1].span[1]
-                    text = "".join(c.text for c in run if c.text)
-                    out.append(Chunk((start, end), text, merged_tag))
-                    run.clear()
-                out.append(ch)
-            else:
-                run.append(ch)
-            i += 1
-
-        # end scanning 
-        if run:
-            start = run[0].span[0]
-            end = run[-1].span[1]
-            text = "".join(c.text for c in run if c.text)
-            out.append(Chunk((start, end), text, merged_tag))
-            run.clear()
-
-        if i < n and chunks[i].tag in boundary_values:
-            out.append(chunks[i])
-            i += 1
-
-        # Copy any non-boundary tail (outside any window)
-        while i < n and chunks[i].tag not in boundary_values:
-            out.append(chunks[i])
-            i += 1
-    return out
-
-
-
-# def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
-#     """
-#     Merge: (RAW)+  +  SFP (one or more, closing)  +  optional PUNCT
-#     → single PRED chunk.
-
-#     Examples:
-#       RAW, PAR, RAW, SFP              -> PRED
-#       RAW, RAW, SFP, PUNCT            -> merges up to the SFP only, LEFT PUNCT as separte tag
-#       RAW, PAR, X                     -> unchanged (no SFP after RAW|PAR run)
-#     """
-#     out: List["Chunk"] = []
-#     i = 0
-#     n = len(chunks)
-
-#     while i < n:
-#         if(chunks[i].tag in FORBID_TAG):
-#             out.append(chunks[i])
-#             i+=1
-#             continue
-#         j = i
-#         if j < n and chunks[j].tag == "NEG":    j += 1
-#         if j < n and chunks[j].tag in ("RAW"):
-#             while j < n and chunks[j].tag in ("RAW"):j += 1
-#            # SFP (one or more) — require at least one
-#             had_sfp = False
-#             while j < n and chunks[j].tag == "SFP":
-#                 had_sfp = True
-#                 j += 1
-              
-#             if had_sfp:
-#                 # if j < n and chunks[j].tag == "PUNCT": j += 1
-#                 start = chunks[i].span[0]
-#                 end = chunks[j - 1].span[1]
-#                 text = "".join(ch.text for ch in chunks[i:j])
-#                 out.append(Chunk((start, end), text, "PRED"))
-#                 i = j
-#                 continue
-                
-#         out.append(chunks[i])
-#         i += 1
-
-#     return out
-
 
 def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
     n = len(chunks)
@@ -193,19 +102,18 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
                 if chunks[j].text == "မ" and neg_index is None: neg_index = j
                 j -= 1
             pred_length = i - j
-            if pred_length > 0 :
+            if pred_length > 1 :
                 start = chunks[j + 1].span[0]
                 end = chunks[i].span[1]
                 text = "".join(ch.text for ch in chunks[j + 1 : i + 1])
-                is_neg_end = (chunks[i].text =="ဘူး")
-                if neg_index is not None and is_neg_end: 
+                if neg_index is not None and chunks[i].text in ("ပါ", "ဘူး", "နဲ့"): 
                     text = "".join(ch.text for ch in chunks[neg_index : i + 1])           
                     out.append(Chunk((neg_index, end), text, "PRED"))
                     text = "".join(ch.text for ch in chunks[j + 1 : neg_index])
                     out.append(Chunk((start, neg_index), text, "RAW"))
                 elif pred_length > max_phrase_length and len(raw_indexs)>0:
                     raw_index = raw_indexs[0]
-                    text = "".join(ch.text for ch in chunks[raw_index+1 : i + 1])           
+                    text = "".join(ch.text for ch in chunks[raw_index+1 : i + 1])        
                     out.append(Chunk((raw_index, end), text, "PRED"))
                     text = "".join(ch.text for ch in chunks[j + 1 : raw_index + 1])
                     out.append(Chunk((start, raw_index), text, "RAW"))
@@ -213,10 +121,7 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
                     out.append(Chunk((start, end), text, "PRED"))
                     
                 i = j
-                continue
-            
-
-            
+                continue            
         out.append(chunks[i])
         i -= 1
 

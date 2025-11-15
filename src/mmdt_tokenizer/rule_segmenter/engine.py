@@ -1,14 +1,16 @@
 from typing import List
 from .types import Chunk
-from .lexicon import SKIP
+from .lexicon import SKIP, FUN_TAG
 from .lexicon import CONJ, POSTP, SFP, CL, VEP
-from .lexicon import MONTH, PRN, REGION, SNOUN, TITLE, REG
+from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
-from .merge_ops import merge_num_classifier, merge_predicate, merge_between_boundaries
-from .cleanner import clean_postp_tag, clean_space_chunk, clean_sfp_chunks
-from .collapse import collapse_to_phrases
+from .merge_ops import merge_day_classifier, merge_num_classifier, merge_predicate
+from .cleanner import clean_postp_tag, clean_sfp_chunks, clean_punt_chunks
 from ..preprocessing import preprocess_burmese_text
 from ..utils.patterns import TAG_PATTERNS
+
+
+import pandas as pd
 
 
 TRIE_CONJ  = build_trie(CONJ)
@@ -18,6 +20,7 @@ TRIE_POST  = build_trie(POSTP)
 TRIE_UNIT  = build_trie(CL)
 
 TRIE_MONTH = build_trie(MONTH)
+TRIE_DAY = build_trie(DAY)
 TRIE_REGION   = build_trie(REGION)
 TRIE_REG   = build_trie(REG)
 TRIE_SNOUN  = build_trie(SNOUN)
@@ -30,6 +33,7 @@ PIPELINE = [
 
     (TRIE_REGION,  "REGION"),
     (TRIE_MONTH, "MONTH"),
+    (TRIE_DAY, "DAY"),
     (TRIE_REG,  "REG"),
     (TRIE_SNOUN, "SNOUN"),
     (TRIE_TITLE,  "TITLE"),
@@ -41,7 +45,6 @@ PIPELINE = [
     (TRIE_POST,  "POSTP"),
     (TRIE_UNIT,  "CL"),   
     
-
 ]
 
 def _check_pre_defined_tag(token: str):
@@ -58,7 +61,8 @@ def _flatten_if_nested(syl_tokens):
         return flat
     return syl_tokens or []
 
-def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
+
+def rule_segment(text: str, protect: bool, get_syllabus):
     # 1) get syllables
     if protect: 
         phrase_tokens, protected = preprocess_burmese_text(text)  
@@ -92,26 +96,19 @@ def rule_segment(text: str, protect: bool, get_syllabus) -> List[str]:
    
     
     # 3) clean 
- 
-    chunks = clean_postp_tag(chunks)
     
-    #chunks = clean_space_chunk(chunks)
+    chunks = clean_postp_tag(chunks)
 
     chunks = clean_sfp_chunks(chunks)
-
+  
     # 4) structural merges
 
+    chunks = merge_day_classifier(chunks)
+    
     chunks = merge_num_classifier(chunks)
-
-    #chunks = merge_between_boundaries(chunks)
-    print(chunks)
+    
     chunks = merge_predicate(chunks)
+    
+    chunks = clean_punt_chunks(chunks)
 
-    
-    
-    
-    # 5) phrase collapse
-    KEY_TAGS = ['REGION', 'MONTH', 'REG', 'SNOUN', 'TITLE', 'CONJ', 'PRN']
-    PHRASE_TAGS = ["PRED", "MERGED"] 
-    FUNCTION_TAGS = list(TAG_PATTERNS.keys()) + KEY_TAGS + PHRASE_TAGS 
-    return collapse_to_phrases(chunks, set(FUNCTION_TAGS))
+    return chunks

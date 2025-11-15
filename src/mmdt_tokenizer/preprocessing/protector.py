@@ -21,11 +21,6 @@ def sub_outside_placeholders(text: str, pattern: re.Pattern, repl) -> str:
 
     return ''.join(parts)
 
-# def protect_patterns(text: str, protect_cb):
-#     for pat in PROTECT_PATTERNS:
-#         text = sub_outside_placeholders(text, pat, protect_cb)
-#     return text
-
 def protect_patterns(text: str, replacer: Callable) -> str:
     
     for pattern in PROTECT_PATTERNS:

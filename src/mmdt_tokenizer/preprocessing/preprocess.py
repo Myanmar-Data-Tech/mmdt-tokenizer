@@ -5,7 +5,6 @@ from .normalizer import split_punct, collapse_digit_spaces
 from .cleaner import remove_punct_outside_protected
 from .protector import protect_patterns
 
-
 SAFE_CHARS = ''.join(chr(c) for c in range(0x10, 0x20) if c not in (0x0a, 0x0d))
 
 def _encode_counter(n: int) -> str:

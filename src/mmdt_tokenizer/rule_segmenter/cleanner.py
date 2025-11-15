@@ -34,17 +34,6 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
 
     return out
 
-
-def clean_space_chunk(chunks: List["Chunk"]) -> List["Chunk"]:
-    out: List["Chunk"] = []
-    for ch in chunks:
-        # Skip chunks where text is empty or only spaces
-        if not ch.text or ch.text.isspace():
-            continue
-        out.append(ch)
-    return out
-
-
 def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
     out: List["Chunk"] = []
     n = len(chunks)
@@ -62,3 +51,8 @@ def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
         out.append(ch)
 
     return out
+
+
+def clean_punt_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
+ 
+    return [ch for ch in chunks if ch.tag != "PUNCT"]

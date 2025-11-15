@@ -27,3 +27,15 @@ def save_tokens_to_csv(tokens: Union[List[str], List[List[str]]], save_csv: str,
         df_rows = pd.DataFrame(sublists)
         df_rows.columns = [f"Token_{i+1}" for i in range(df_rows.shape[1])]
         df_rows.to_csv(save_csv, index=False, encoding="utf-8-sig")
+
+
+    
+def save_tags_to_csv(chunks, save_csv_filename):
+    if not chunks:
+        return False
+    else: chunks = chunks[0] if isinstance(chunks[0], list) else chunks
+    df = pd.DataFrame(chunks)
+    df.to_csv(save_csv_filename, index=False, encoding="utf-8-sig")
+
+
+    
