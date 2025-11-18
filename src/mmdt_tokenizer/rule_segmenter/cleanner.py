@@ -5,13 +5,13 @@ from dataclasses import replace
 
 def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     """
-    If a 'postp' chunk is preceded by punctuation, change its pos to 'raw'.
+    If a 'postp' chunk is preceded by punctuation, change its pos to 'par'.
 
     Preceded-by-punctuation includes:
       1) previous chunk's is tagged as POSTP
       2) previous chunk's text ends with punctuation 
       3) the current chunk's text begins with punctuation 
-         This covers scripts where punctuation may attach to the token, e.g., Myanmar '၊' '။'.
+         This covers scripts where punctuation may attach to the token, e.g., '၊' '။'.
     """
     out: List["Chunk"] = []
     for i, ch in enumerate(chunks):
@@ -28,13 +28,19 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
             is_start_punct = bool(cur_text) and (cur_text[0] in SKIP)
 
             if i == 0 or is_prec_punct or is_end_punct or is_start_punct:
-                new_ch = replace(ch, tag="RAW")
+                new_ch = replace(ch, tag="PAR")
         
         out.append(new_ch)
 
     return out
 
 def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
+    """
+    If a 'sfp' chunk is isolated and not at the end of the sentence or before conjunction,
+    change to 'par'.
+
+    """
+    #Fixed Me. 
     out: List["Chunk"] = []
     n = len(chunks)
 
@@ -55,4 +61,4 @@ def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
 
 def clean_punt_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
  
-    return [ch for ch in chunks if ch.tag != "PUNCT"]
+    return [ch for ch in chunks if ch.text not in SKIP]

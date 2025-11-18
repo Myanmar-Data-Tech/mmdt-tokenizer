@@ -1,7 +1,7 @@
 from typing import List
 from .types import Chunk
-from .lexicon import SKIP, FUN_TAG
-from .lexicon import CONJ, POSTP, SFP, CL, VEP
+from .lexicon import SKIP
+from .lexicon import CONJ, POSTP, SFP, CL, VEP, CLEP, QW
 from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
 from .merge_ops import merge_day_classifier, merge_num_classifier, merge_predicate
@@ -15,9 +15,11 @@ import pandas as pd
 
 TRIE_CONJ  = build_trie(CONJ)
 TRIE_SFP   = build_trie(SFP)
+TRIE_QW   = build_trie(QW)
 TRIE_VEP   = build_trie(VEP)
 TRIE_POST  = build_trie(POSTP)
 TRIE_UNIT  = build_trie(CL)
+TRIE_CLEP   = build_trie(CLEP)
 
 TRIE_MONTH = build_trie(MONTH)
 TRIE_DAY = build_trie(DAY)
@@ -42,8 +44,10 @@ PIPELINE = [
     (TRIE_CONJ,  "CONJ"),
     (TRIE_SFP,   "SFP"),
     (TRIE_VEP,   "VEP"),
+    (TRIE_QW,   "QW"),
     (TRIE_POST,  "POSTP"),
     (TRIE_UNIT,  "CL"),   
+    (TRIE_CLEP,  "CLEP"),  
     
 ]
 
@@ -93,22 +97,25 @@ def rule_segment(text: str, protect: bool, get_syllabus):
             chunks.append(m); i = m.span[1] + 1
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
-   
     
-    # 3) clean 
-    
-    chunks = clean_postp_tag(chunks)
 
-    chunks = clean_sfp_chunks(chunks)
-  
-    # 4) structural merges
+    # 3) structural merges
 
     chunks = merge_day_classifier(chunks)
     
     chunks = merge_num_classifier(chunks)
-    
+    print(chunks)
     chunks = merge_predicate(chunks)
     
-    chunks = clean_punt_chunks(chunks)
 
+     # 4) clean punct after merging
+
+    #chunks = clean_postp_tag(chunks)
+
+    #chunks = clean_sfp_chunks(chunks)
+    
+    chunks = clean_punt_chunks(chunks)
+    
+   
+ 
     return chunks

@@ -31,10 +31,13 @@ def save_tokens_to_csv(tokens: Union[List[str], List[List[str]]], save_csv: str,
 
     
 def save_tags_to_csv(chunks, save_csv_filename):
-    if not chunks:
-        return False
-    else: chunks = chunks[0] if isinstance(chunks[0], list) else chunks
-    df = pd.DataFrame(chunks)
+    if chunks and isinstance(chunks[0], list):
+        flat_chunks = [ch for sent in chunks for ch in sent]
+    elif chunks:
+        flat_chunks = chunks
+    else:
+        flat_chunks = []
+    df = pd.DataFrame(flat_chunks)
     df.to_csv(save_csv_filename, index=False, encoding="utf-8-sig")
 
 
