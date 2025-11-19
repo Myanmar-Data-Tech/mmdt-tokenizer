@@ -1,7 +1,7 @@
 from typing import List
 from .types import Chunk
 from .lexicon import SKIP
-from .lexicon import CONJ, POSTP, SFP, CL, VEP, CLEP, QW
+from .lexicon import CONJ, MCONJ, POSTP, SFP, CL, VEP, CLEP, QW
 from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
 from .merge_ops import merge_day_classifier, merge_num_classifier, merge_predicate
@@ -14,6 +14,7 @@ import pandas as pd
 
 
 TRIE_CONJ  = build_trie(CONJ)
+TRIE_MCONJ  = build_trie(MCONJ)
 TRIE_SFP   = build_trie(SFP)
 TRIE_QW   = build_trie(QW)
 TRIE_VEP   = build_trie(VEP)
@@ -42,6 +43,7 @@ PIPELINE = [
     (TRIE_PRN,  "PRN"),
 
     (TRIE_CONJ,  "CONJ"),
+    (TRIE_MCONJ,  "MCONJ"),
     (TRIE_SFP,   "SFP"),
     (TRIE_VEP,   "VEP"),
     (TRIE_QW,   "QW"),
@@ -70,6 +72,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
     # 1) get syllables
     if protect: 
         phrase_tokens, protected = preprocess_burmese_text(text)  
+        
         tokens = []
         for phrase in phrase_tokens:
             if phrase in protected:
@@ -80,7 +83,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
                 tokens.extend(syllable_tokens)
     else:
         tokens = _flatten_if_nested(get_syllabus(text))  
-    
+    print(tokens)
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -89,6 +92,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
         if t in SKIP:
             chunks.append(Chunk((i,i), t, "PUNCT")); i += 1; continue
         tag = _check_pre_defined_tag(t)
+
         if tag: 
             chunks.append(Chunk((i,i), t, tag)); i += 1; continue
         m = scan_longest_at(tokens, i, PIPELINE)
@@ -100,13 +104,13 @@ def rule_segment(text: str, protect: bool, get_syllabus):
     
 
     # 3) structural merges
-
+    
     chunks = merge_day_classifier(chunks)
     
     chunks = merge_num_classifier(chunks)
-    print(chunks)
-    chunks = merge_predicate(chunks)
     
+    chunks = merge_predicate(chunks)
+  
 
      # 4) clean punct after merging
 

@@ -6,11 +6,6 @@ from .lexicon import SKIP, FUN_TAG
 def collapse_to_phrases(chunks) -> List[str]:
     surface: List[str] = []
     buf: List[str] = []
-    
-    def flush():
-        if buf:
-            surface.append("".join(buf))
-            buf.clear()
 
     # flatten if is nested
     if chunks and isinstance(chunks[0], list):
@@ -22,41 +17,44 @@ def collapse_to_phrases(chunks) -> List[str]:
         flat_chunks = [ch for sent in augmented for ch in sent]
     else:
         flat_chunks = chunks
+    
 
-    # FIXED ME : #Noun Phrase (FUN_TAG + POSTP/ CONJ - one word)
+    def flush():
+        if buf:
+            surface.append("".join(buf))
+            buf.clear()
+
 
     for ch in flat_chunks:
         tag = getattr(ch, "tag", None)
         txt = getattr(ch, "text", "") 
         
         if tag == "PUNCT":
+            # skip punctuation except ။
             flush()
-            surface.append(txt)
             continue
 
-        if tag == "CONJ":
+        if tag == "EMPTY":
+            # add ။ to the last text
+            if surface: surface[-1] +=txt
             flush()
-            surface.append(txt+" ")
             continue
 
-        if tag == "POSTP":
-            if buf: buf.append(txt + " ")
-            elif surface: surface[-1] +=txt + " "
-            else: surface.append(txt + " ")
+        if tag in ("CONJ", "POSTP"):
+            # Merge to last text
+            if buf: buf.append(txt)
+            elif surface: surface[-1] +=txt
+            else: surface.append(txt)
+            flush()
             continue
-
 
         if tag in FUN_TAG:
             flush()
             surface.append(txt)
             continue
         
-        if tag == "EMPTY":
-            flush()
-            surface.append(txt)
-            continue
-        
-        buf.append(txt)
+        buf.append(txt) # raw goes here
+
     
     # push remaining one
     flush()

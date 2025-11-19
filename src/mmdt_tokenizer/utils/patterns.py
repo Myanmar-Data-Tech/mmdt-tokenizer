@@ -106,20 +106,22 @@ PROTECT_PATTERNS =[
 
 my_consonant = r'က-အ'
 en_char = r'a-zA-Z0-9'
-other_char = r'ဣဤဦဧဩဪဿ၌၍၏၀-၉၊။!-/:-@[-`{-~\s'# remove--ဥ
+other_char = r'ဣဤဦဧဩဪဿ၌၍၏၀-၉၊။!-/:-@[-`{-~\s'
 subscript_symbol = r'္'  #U+1039 (ထပ်ဆင့်)
 dot_below_symbol = r'့'  #U+1037 (အောက်ကမြင့်)
 a_that = r'်' # U+103A athet
 
+
 SYLLABLE_BREAK_PATTERN = re.compile(
-    r"((?<!" + subscript_symbol + r")[" + my_consonant + r"]"
-    r"(?![" + a_that + subscript_symbol +r"])" 
-    r"(?![" + dot_below_symbol + a_that +r"])" 
-    + r"|[" + en_char + other_char + r"])",
+    r"("  
+        r"(?<!" + subscript_symbol + r")[" + my_consonant + r"]"
+        r"(?![" + a_that + subscript_symbol + r"])"
+        r"(?![" + dot_below_symbol + a_that + r"])"
+        r"|[" + en_char + other_char + r"]"
+        r"|ဥ(?!"+ a_that + r")"
+    r")",
     re.UNICODE
 )
-
-
 
 
 
