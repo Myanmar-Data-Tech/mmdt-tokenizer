@@ -83,7 +83,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
                 tokens.extend(syllable_tokens)
     else:
         tokens = _flatten_if_nested(get_syllabus(text))  
-    print(tokens)
+    
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -110,7 +110,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
     chunks = merge_num_classifier(chunks)
     
     chunks = merge_predicate(chunks)
-  
+    
 
      # 4) clean punct after merging
 
@@ -119,7 +119,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
     #chunks = clean_sfp_chunks(chunks)
     
     chunks = clean_punt_chunks(chunks)
-    
+    print(chunks)
    
  
     return chunks

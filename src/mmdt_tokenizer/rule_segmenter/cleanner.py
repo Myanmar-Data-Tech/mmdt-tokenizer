@@ -60,5 +60,5 @@ def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
 
 
 def clean_punt_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
- 
-    return [ch for ch in chunks if ch.text not in SKIP]
+    remove_pun = {" ", "",",", "?", "!"}
+    return [ch for ch in chunks if ch.text not in remove_pun]

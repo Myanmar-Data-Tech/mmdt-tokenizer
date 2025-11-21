@@ -119,11 +119,11 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
                     out.append(Chunk((que_index, end), text, "PRED"))
                     text = "".join(ch.text for ch in chunks[j + 1 : que_index])
                     out.append(Chunk((start, que_index), text, "RAW"))
-                elif len(raw_indexs)>0:
+                elif len(raw_indexs)>2:
                     raw_index = raw_indexs[0]
-                    text = "".join(ch.text for ch in chunks[raw_index+1 : i + 1])        
+                    text = "".join(ch.text for ch in chunks[raw_index-1 : i + 1])        
                     out.append(Chunk((raw_index, end), text, "PRED"))
-                    text = "".join(ch.text for ch in chunks[j + 1 : raw_index + 1])
+                    text = "".join(ch.text for ch in chunks[j + 1 : raw_index -1])
                     out.append(Chunk((start, raw_index), text, "PVERB"))
                 else:
                     out.append(Chunk((start, end), text, "PRED"))
