@@ -41,8 +41,8 @@ DATE_PATTERN_01 = re.compile(
 )
 
 DATE_PATTERN_02 = re.compile(
-    r'(?:[0-9\u1040-\u1049]+|(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သိန်း|သန်း|ရာခိုင်နှုန်း)+)\s*(?:ခု(?:နှစ်)?)?\s*'
-    r'(?:ဇန်နဝါရီ|ဖေဖော်ဝါရီ|မတ်|ဧပြီ|မေ|ဇွန်|ဇူလိုင်|ဩဂုတ်|အော်ဂုတ်|စက်တင်ဘာ|အောက်တိုဘာ|နိုဝင်ဘာ|ဒီဇင်ဘာ)\s*(?:လ)?\s*'
+    r'(?:[0-9\u1040-\u1049]+|(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သိန်း|သန်း)+)\s*(?:ခု(?:နှစ်)?)?\s*'
+    r'(?:ဇန်နဝါရီ|ဖေဖော်ဝါရီ|မတ်|ဧပြီ|မေ|ဇွန်|ဇူလိုင်|ဩဂုတ်|အောဂုတ်|စက်တင်ဘာ|အောက်တိုဘာ|နိုဝင်ဘာ|ဒီဇင်ဘာ)\s*(?:လ)?\s*'
     r'(?:[0-9\u1040-\u1049]+|(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ထောင်|သောင်း|သိန်း|သန်း)+)\s*(?:ရက်(?:နေ့)?)?',
     re.UNICODE
 )
@@ -56,20 +56,31 @@ FRC_NUM_PATTERN = re.compile(r'[0-9\u1040-\u1049]+/[0-9\u1040-\u1049]+')  # frac
 NUMBER_PATTERN = re.compile(r'^[\d၀-၉]+(?:[,.][\d၀-၉]+)*$') # Numbers (English or Myanmar digits, with , or .)
 WORD_NUM_PATTERN = re.compile(
     r'(?<![\u1000-\u1021\u102B-\u103E])'
-    r'(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနစ်|ရှစ်|ကိုး|ဆယ်|ရာ|ဆယ့်|ရာ့|ထောင်|ထောင့်|သောင်း|သိန်း|သန်း|ရာခိုင်နှုန်း)'
+    r'(?:တစ်|နှစ်|သုံး|လေး|ငါး|ခြောက်|ခုနစ်|ရှစ်|ကိုး|ဆယ်|ရာခိုင်နှုန်း|ရာ|ဆယ့်|ရာ့|ထောင်|ထောင့်|သောင်း|သိန်း|သန်း)'
     r'(?:[\u102B-\u103E]*)(?![\u1000-\u1021\u102B-\u103E])')
 PHONE_NUM_PATTERN = re.compile(r'(?:\+?95|09|၀၉)[\s\-]?(?:[0-9\u1040-\u1049][\s\-]?){6,}')
 
 POSSESIVE_PATTERN = re.compile(r"\b\w+'[a-zA-Z]+\b")
 
+# PARLI_NAME_PATTERN = re.compile(
+#     rf'(?:(?<=^)|(?<=\s)|(?<=[\u104A\u104B.,;:!?]))'   # left boundary: start/space/punct
+#     rf'('
+#     rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # Myanmar run (no spaces)
+#     rf'\u1039'                                         # must contain virama = stacked
+#     rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # rest of run
+#     rf')'
+#     rf'(?=$|\s|[\u104A\u104B.,;:!?])')           
+
+MY = r'[\u1000-\u109F\u102B-\u103E\u1037\u1038]'
+
 PARLI_NAME_PATTERN = re.compile(
-    rf'(?:(?<=^)|(?<=\s)|(?<=[\u104A\u104B.,;:!?]))'   # left boundary: start/space/punct
+    rf'(?<!{MY})'              # left boundary: not inside a Myanmar run
     rf'('
-    rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # Myanmar run (no spaces)
-    rf'\u1039'                                         # must contain virama = stacked
-    rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # rest of run
+    rf'\u1039'                 # virama (stacked)
+    rf'{MY}{{1,4}}'            # 1–4 Myanmar chars AFTER virama (tune this)
     rf')'
-    rf'(?=$|\s|[\u104A\u104B.,;:!?])')           
+    rf'(?={MY}|$|[\s\u104A\u104B.,;:!?])'  # right boundary: allow glued-after
+)
 
 TAG_PATTERNS = {
     "NUM": [NUMBER_PATTERN, PHONE_NUM_PATTERN],

@@ -4,8 +4,8 @@ from .lexicon import SKIP
 from .lexicon import CONJ, MCONJ, POSTP, SFP, CL, VEP, CLEP, QW
 from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
-from .merge_ops import merge_day_classifier, merge_num_classifier, merge_predicate
-from .cleanner import clean_postp_tag, clean_sfp_chunks, clean_punt_chunks
+from .merge_ops import merge_num_classifier, merge_predicate
+from .cleanner import clean_cls_tag, clean_sfp_chunks, clean_wordnum_tag, clean_punt_chunks
 from ..preprocessing import preprocess_burmese_text
 from ..utils.patterns import TAG_PATTERNS
 
@@ -83,7 +83,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
                 tokens.extend(syllable_tokens)
     else:
         tokens = _flatten_if_nested(get_syllabus(text))  
-    
+
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -91,6 +91,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
         t = tokens[i]
         if t in SKIP:
             chunks.append(Chunk((i,i), t, "PUNCT")); i += 1; continue
+        
         tag = _check_pre_defined_tag(t)
 
         if tag: 
@@ -102,24 +103,29 @@ def rule_segment(text: str, protect: bool, get_syllabus):
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
     
-
+    
     # 3) structural merges
     
-    chunks = merge_day_classifier(chunks)
+    
+    chunks = clean_wordnum_tag(chunks)
     
     chunks = merge_num_classifier(chunks)
     
     chunks = merge_predicate(chunks)
     
+    
 
-     # 4) clean punct after merging
+
+    # 4) clean punct after merging
 
     #chunks = clean_postp_tag(chunks)
-
-    #chunks = clean_sfp_chunks(chunks)
+  
+    chunks = clean_sfp_chunks(chunks)
     
-    chunks = clean_punt_chunks(chunks)
-    print(chunks)
-   
+    chunks = clean_cls_tag(chunks)
+
+
+    #chunks = clean_punt_chunks(chunks)
+
  
     return chunks
