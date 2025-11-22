@@ -21,7 +21,7 @@ def collapse_to_phrases(chunks):
             
             if tag == "PUNCT":
                 # skip punctuation except ။
-                if surface and txt == "။": surface[-1] +=txt
+                if surface and txt in ("။", "၊"): surface[-1] +=txt
                 flush()
                 continue
 
@@ -43,7 +43,8 @@ def collapse_to_phrases(chunks):
         
         # push remaining one
         flush()
-        all_tokens = [t for t in surface]
+        PUNCT_WT_ENDING = {" ", "", ",", "?", "!"}
+        all_tokens = [t for t in surface if t not in PUNCT_WT_ENDING]
     
         sentences.append(all_tokens)
     return sentences
