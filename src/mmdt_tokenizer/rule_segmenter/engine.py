@@ -5,7 +5,7 @@ from .lexicon import CONJ, MCONJ, POSTP, SFP, CL, VEP, CLEP, QW
 from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
 from .scanner import build_trie, scan_longest_at
 from .merge_ops import merge_num_classifier, merge_predicate
-from .cleanner import clean_cls_tag, clean_sfp_chunks, clean_wordnum_tag, clean_punt_chunks
+from .cleanner import clean_cls_tag, clean_sfp_chunks, clean_wordnum_tag, clean_postp_tag,clean_chunks
 from ..preprocessing import preprocess_burmese_text
 from ..utils.patterns import TAG_PATTERNS
 
@@ -102,8 +102,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
             chunks.append(m); i = m.span[1] + 1
         else:
             chunks.append(Chunk((i,i), t, "RAW")); i += 1
-    
-    
+
     # 3) structural merges
     
     
@@ -118,14 +117,14 @@ def rule_segment(text: str, protect: bool, get_syllabus):
 
     # 4) clean punct after merging
 
-    #chunks = clean_postp_tag(chunks)
+    
   
     chunks = clean_sfp_chunks(chunks)
     
     chunks = clean_cls_tag(chunks)
 
-
-    #chunks = clean_punt_chunks(chunks)
-
+    
+    chunks = clean_postp_tag(chunks)
+    chunks = clean_chunks(chunks)
  
     return chunks

@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mmdt-tokenizer"
 version = "0.1.0"
-description = "Myanmar grammar-driven tokenizer"
+description = "Myanmar Text Segmenter"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "MMDT" }]

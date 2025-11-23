@@ -1,7 +1,8 @@
 from typing import List
 from .types import Chunk
 from .lexicon import SKIP
-from dataclasses import replace
+import re
+
 
 def clean_wordnum_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     """
@@ -62,7 +63,7 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     out: List["Chunk"] = []
     day_cl = ("နေ့", "ရက်")
     mth_cl =  "လ"
-    prefix_cl = ("အနှစ်", "အကြိမ်", "အသက်")
+
     for i, cur in enumerate(chunks):
         # default: keep original tag
         final_tag = cur.tag
@@ -75,20 +76,13 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
                 final_tag = "DAYCL"
             if prev_tag == "MONTH" and cur.text == mth_cl:
                 final_tag = "MONTHCL"
-                
-            if next_tag == "NUM" and cur.text in prefix_cl:
-                final_tag = "INUMCL"
-            else:
-                final_tag = "RAW"
-
-
         out.append(Chunk(cur.span, cur.text, final_tag))
 
     return out
 
 def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     """
-    If a 'postp' chunk is preceded by punctuation, change its pos to 'par'.
+    If a 'postp' chunk is preceded by punctuation, change its pos to 'raw'.
 
     Preceded-by-punctuation includes:
       1) previous chunk's is tagged as POSTP
@@ -97,23 +91,24 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
          This covers scripts where punctuation may attach to the token, e.g., '၊' '။'.
     """
     out: List["Chunk"] = []
-    for i, ch in enumerate(chunks):
-        new_ch = replace(ch)
-
-        if ch.tag == "POSTP":
+    n = len(chunks)
+    i = 0
+    special_postp = ("ကို", "က", "မှာ", "ရော", "အား")
+    while i <n:
+        ch = chunks[i]
+        if  ch.text in special_postp:
             prev_tag = chunks[i - 1].tag if i > 0 else None
             prev_text = chunks[i -1].text if i > 0 else ""
+            next_tag = chunks[i + 1].tag if i+1<n else None
 
-            is_prec_punct = (i > 0 and prev_tag == "PUNCT")
-            is_end_punct = bool(prev_text) and (prev_text[-1] in SKIP)
-
-            cur_text = getattr(ch, "text", "") or ""
-            is_start_punct = bool(cur_text) and (cur_text[0] in SKIP)
-
-            if i == 0 or is_prec_punct or is_end_punct or is_start_punct:
-                new_ch = replace(ch, tag="PAR")
+            if i == 0 or next_tag == "RAW" or (prev_tag == "POSTP" and prev_text == ch.text):
+                out.append(Chunk(ch.span, ch.text, "RAW"))
+                i +=1
+                continue
         
-        out.append(new_ch)
+        out.append(ch)
+        i += 1
+    
 
     return out
 
@@ -157,7 +152,14 @@ def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
 
     return out
 
+def clean_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
+    
+    cleaned = []
+    for ch in chunks:
+        ZW_CHARS = r"[\u200b\ufeff\u2060]" 
+        new_text = re.sub(ZW_CHARS, "", ch.text)
 
-def clean_punt_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
-    remove_pun = {" ", "",",", "?", "!"}
-    return [ch for ch in chunks if ch.text not in remove_pun]
+        if new_text:
+            cleaned.append(Chunk(ch.span, new_text, ch.tag))
+
+    return cleaned
