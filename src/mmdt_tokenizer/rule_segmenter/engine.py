@@ -105,26 +105,19 @@ def rule_segment(text: str, protect: bool, get_syllabus):
 
     # 3) structural merges
     
-    
     chunks = clean_wordnum_tag(chunks)
     
     chunks = merge_num_classifier(chunks)
     
     chunks = merge_predicate(chunks)
     
-    
-
 
     # 4) clean punct after merging
 
-    
-  
     chunks = clean_sfp_chunks(chunks)
-    
     chunks = clean_cls_tag(chunks)
 
-    
     chunks = clean_postp_tag(chunks)
     chunks = clean_chunks(chunks)
- 
+  
     return chunks

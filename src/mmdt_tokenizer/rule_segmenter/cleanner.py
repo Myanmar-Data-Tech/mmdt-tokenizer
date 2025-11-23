@@ -63,12 +63,13 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     out: List["Chunk"] = []
     day_cl = ("နေ့", "ရက်")
     mth_cl =  "လ"
+    pnum_cl = ("အကြိမ်", "အနှစ်", "အသက်")
 
     for i, cur in enumerate(chunks):
         # default: keep original tag
         final_tag = cur.tag
 
-        if cur.tag in ("CL", "VEP"):
+        if cur.tag in ("CL", "VEP") or cur.text in pnum_cl:
             prev_tag = chunks[i - 1].tag if i > 0 else None
             next_tag = chunks[i + 1].tag if i+1<len(chunks) else None
 
@@ -76,6 +77,10 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
                 final_tag = "DAYCL"
             if prev_tag == "MONTH" and cur.text == mth_cl:
                 final_tag = "MONTHCL"
+
+            if next_tag in ("NUM", "WORDNUM") and cur.text in pnum_cl:
+                final_tag = "INUMCL"
+
         out.append(Chunk(cur.span, cur.text, final_tag))
 
     return out
@@ -97,11 +102,15 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     while i <n:
         ch = chunks[i]
         if  ch.text in special_postp:
-            prev_tag = chunks[i - 1].tag if i > 0 else None
-            prev_text = chunks[i -1].text if i > 0 else ""
+            prev_tag = chunks[i - 1].tag if i-1 > 0 else None
+            prev_text = chunks[i -1].text if i-1 > 0 else ""
+            prev_prev_tag = chunks[i - 2].tag if i-2 > 0 else None
+            prev_prev_text = chunks[i - 2].text if i-2 > 0 else ""
             next_tag = chunks[i + 1].tag if i+1<n else None
 
-            if i == 0 or next_tag == "RAW" or (prev_tag == "POSTP" and prev_text == ch.text):
+            if (i == 0 or next_tag == "RAW" or 
+                (prev_tag == "POSTP" and prev_text == ch.text) or
+                (prev_tag == "PUNCT" and prev_prev_tag == "POSTP" and prev_prev_text == ch.text)):
                 out.append(Chunk(ch.span, ch.text, "RAW"))
                 i +=1
                 continue
