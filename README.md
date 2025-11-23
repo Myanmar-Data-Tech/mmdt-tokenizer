@@ -1,9 +1,4 @@
-## mmdt-tokenizer
-A Myanmar text tokenizer library (“mmdt-tokenizer”) for word- and syllable-level tokenization, normalization, and preprocessing. Useful for processing Burmese , mixed text, numbers, and English segments.
-
----
-
-## Grammar-based tokenization
+## Grammar-based Text Segmentation
 
 The mmdt-tokenizer is designed with a grammar-oriented approach to Myanmar text segmentation.
 It models tokenization through the grammatical structure of the language, particularly the use of postpositions, particles, and predicate constructions.
