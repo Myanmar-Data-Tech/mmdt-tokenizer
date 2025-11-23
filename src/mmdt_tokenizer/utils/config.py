@@ -10,6 +10,4 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-DICT_FILE_PATH = DATA_DIR / "myg2p_mypos.dict" # FIXMED - NOT USE
-
 

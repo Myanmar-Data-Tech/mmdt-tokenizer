@@ -70,3 +70,18 @@ def test_word_tokenize_conll_style(tokenizer):
 
     df_out = pd.read_csv(csv_output_path)
     assert df_out.shape[1] in (1, 2), "Unexpected number of columns in CoNLL-style CSV"
+
+
+def test_tagging_csv(tokenizer):
+    """Tests the CSV loading/saving feature exposed by the main tokenizer."""
+    csv_input_path = DATA_DIR /"test_data.csv" 
+    csv_text_path = OUTPUT_DIR / "result_word_text.csv"
+    csv_output_path = OUTPUT_DIR / "result_word_tag.csv"
+
+    df = pd.read_csv(csv_input_path)
+    
+    tokenizer.word_tokenize(df,column = 'original_sentence', 
+                                     save_csv=str(csv_text_path), save_tag=str(csv_output_path), 
+                                     conll_style=False)
+
+    assert Path(csv_output_path).exists()

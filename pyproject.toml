@@ -14,7 +14,6 @@ license = { text = "MIT" }
 dependencies = [
     "numpy",
     "pandas",
-    "re",
 ]
 
 [tool.hatch.build.targets.wheel]
