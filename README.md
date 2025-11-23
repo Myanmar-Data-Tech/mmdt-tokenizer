@@ -66,6 +66,7 @@ src/
     │
     ├── rule_segmenter/
     │   ├── __init__.py
+    |   ├── cleaner.py
     │   ├── collapse.py
     │   ├── engine.py
     │   ├── lexicon.py
@@ -83,9 +84,7 @@ src/
     │   ├── config.py
     │   ├── csv_utils.py
     │   ├── data_utils.py
-    │   ├── patterns.py
-    │   ├── text_utils.py
-    │   └── core.py
+    │   └── patterns.py
     │
     ├── scripts/
     │   ├── build_lexicons.py
