@@ -16,14 +16,14 @@ def test_conjunctions(tokenizer):
 def test_month_and_date(tokenizer):
     text = "မေလ ၁ ရက်နေ့မှာ စတင်မည်။"
     tokens = tokenizer.word_tokenize(text)
-    expected = ['မေလ', '၁ရက်နေ့မှာ', 'စတင်', "မည်။"]
+    expected = ['မေလ', '၁ရက်နေ့မှာ', "စတင်", "မည်။"]
     assert tokens[0] == expected
 
 
 def test_negation(tokenizer):
-    text = "ကျွန်မ မသွားဘူး။" 
+    text = "အစီအစဥ်ကို သူမစိတ်ဆိုး မနေပါဘူး"
     tokens = tokenizer.word_tokenize(text)
-    expected = ["ကျွန်မ", "မသွားဘူး။"]
+    expected = ['အစီအစဥ်ကို', 'သူမစိတ်ဆိုး', 'မနေပါဘူး']
     assert tokens[0] == expected
 
 def test_punctuation_only(tokenizer):

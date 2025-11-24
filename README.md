@@ -116,11 +116,19 @@ src/
 pip install mmdt-tokenizer
 ```
 
-For developer
+## Usage Example
+
 ```bash
-git clone https://github.com/<your-org-or-user>/mmdt-tokenizer.git
-cd mmdt-tokenizer
-pip install -e .
+from mmdt_tokenizer import MyanmarTokenizer
+
+tokenizer = MyanmarTokenizer()
+
+text = "သူသွားမယ်သို့မဟုတ်သူလာမယ်။"
+tokens = tokenizer.word_tokenize(text)
+
+print(tokens)
+# Expected Output: ["သူ", "သွားမယ်", "သို့မဟုတ်", "သူ", "လာမယ်။"]
+
 ```
 ---
 ## License

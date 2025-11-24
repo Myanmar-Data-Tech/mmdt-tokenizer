@@ -25,7 +25,7 @@ def collapse_to_phrases(chunks):
                 flush()
                 continue
 
-            if tag in ("NUMCL", "DAYCL", "MONTHCL", "CONJ", "POSTP", "PRED"):
+            if tag in ("NUMCL", "DAYCL", "MONTHCL", "CONJ", "POSTP"):
                 # Merge to last text
                 if buf: buf.append(txt)
                 elif surface: surface[-1] +=txt
@@ -33,7 +33,7 @@ def collapse_to_phrases(chunks):
                 flush()
                 continue
 
-            if tag in FUN_TAG and tag != "PRED":
+            if tag in FUN_TAG:
                 flush()
                 surface.append(txt)
                 continue
