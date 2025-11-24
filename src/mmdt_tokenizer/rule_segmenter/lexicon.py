@@ -1158,7 +1158,7 @@ REGION = {
 SKIP = {" ", "","၊", "။", ",", "?", "!"}
 # --- NOT TO MERGE IN NOUNCL /POSTP ---
 
-FUN_TAG = {"PRED", "NUM", "PVERB", 
+FUN_TAG = {"PRED", "NUM", 
             "MCONJ", "INUMCL", 
             'REGION', 'MONTH', 'DAY', 'REG', 'SNOUN', 'TITLE',   
             'ORG', 'NAME', 'PARLI', 'DATE', 'TIME', 'EMAIL', 'URL'}
