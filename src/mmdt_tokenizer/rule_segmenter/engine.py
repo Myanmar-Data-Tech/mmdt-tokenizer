@@ -2,7 +2,7 @@ from typing import List
 from .types import Chunk
 from .lexicon import SKIP
 from .lexicon import CONJ, MCONJ, POSTP, SFP, CL, VEP, CLEP, QW
-from .lexicon import MONTH, DAY, PRN, REGION, SNOUN, TITLE, REG
+from .lexicon import MONTH, DAY, PRN, REGION, SWORD, TITLE, REG
 from .scanner import build_trie, scan_longest_at
 from .merge_ops import merge_num_classifier, merge_predicate
 from .cleanner import clean_cls_tag, clean_sfp_chunks, clean_wordnum_tag, clean_postp_tag,clean_chunks
@@ -26,7 +26,7 @@ TRIE_MONTH = build_trie(MONTH)
 TRIE_DAY = build_trie(DAY)
 TRIE_REGION   = build_trie(REGION)
 TRIE_REG   = build_trie(REG)
-TRIE_SNOUN  = build_trie(SNOUN)
+TRIE_SWORD  = build_trie(SWORD)
 TRIE_TITLE   = build_trie(TITLE)
 TRIE_PRN   = build_trie(PRN)
 
@@ -38,14 +38,14 @@ PIPELINE = [
     (TRIE_MONTH, "MONTH"),
     (TRIE_DAY, "DAY"),
     (TRIE_REG,  "REG"),
-    (TRIE_SNOUN, "SNOUN"),
+    (TRIE_SWORD, "SWORD"),
     (TRIE_TITLE,  "TITLE"),
     (TRIE_PRN,  "PRN"),
 
     (TRIE_CONJ,  "CONJ"),
     (TRIE_MCONJ,  "MCONJ"),
-    (TRIE_SFP,   "SFP"),
     (TRIE_VEP,   "VEP"),
+    (TRIE_SFP,   "SFP"),
     (TRIE_QW,   "QW"),
     (TRIE_POST,  "POSTP"),
     (TRIE_UNIT,  "CL"),   
@@ -83,7 +83,7 @@ def rule_segment(text: str, protect: bool, get_syllabus):
                 tokens.extend(syllable_tokens)
     else:
         tokens = _flatten_if_nested(get_syllabus(text))  
-
+    
     # 2) single pass labeling (priority + longest-match)
     chunks: List[Chunk] = []
     i = 0; n = len(tokens)
@@ -108,9 +108,9 @@ def rule_segment(text: str, protect: bool, get_syllabus):
     chunks = clean_wordnum_tag(chunks)
     
     chunks = merge_num_classifier(chunks)
-    
+
     chunks = merge_predicate(chunks)
-    
+
 
     # 4) clean punct after merging
 
@@ -119,5 +119,5 @@ def rule_segment(text: str, protect: bool, get_syllabus):
 
     chunks = clean_postp_tag(chunks)
     chunks = clean_chunks(chunks)
-  
+    
     return chunks

@@ -37,6 +37,7 @@ def save_tags_to_csv(chunks, save_csv_filename):
         flat_chunks = chunks
     else:
         flat_chunks = []
+    flat_chunks = [ch for ch in flat_chunks if getattr(ch, "tag", None) != "PUNCT"]
     df = pd.DataFrame(flat_chunks)
     df.to_csv(save_csv_filename, index=False, encoding="utf-8-sig")
 

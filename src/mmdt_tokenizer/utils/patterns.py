@@ -62,32 +62,12 @@ PHONE_NUM_PATTERN = re.compile(r'(?:\+?95|09|၀၉)[\s\-]?(?:[0-9\u1040-\u1049]
 
 POSSESIVE_PATTERN = re.compile(r"\b\w+'[a-zA-Z]+\b")
 
-# PARLI_NAME_PATTERN = re.compile(
-#     rf'(?:(?<=^)|(?<=\s)|(?<=[\u104A\u104B.,;:!?]))'   # left boundary: start/space/punct
-#     rf'('
-#     rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # Myanmar run (no spaces)
-#     rf'\u1039'                                         # must contain virama = stacked
-#     rf'[\u1000-\u109F\u102B-\u103E\u1037\u1038]*'      # rest of run
-#     rf')'
-#     rf'(?=$|\s|[\u104A\u104B.,;:!?])')           
-
-MY = r'[\u1000-\u109F\u102B-\u103E\u1037\u1038]'
-
-PARLI_NAME_PATTERN = re.compile(
-    rf'(?<!{MY})'              # left boundary: not inside a Myanmar run
-    rf'('
-    rf'\u1039'                 # virama (stacked)
-    rf'{MY}{{1,4}}'            # 1–4 Myanmar chars AFTER virama (tune this)
-    rf')'
-    rf'(?={MY}|$|[\s\u104A\u104B.,;:!?])'  # right boundary: allow glued-after
-)
 
 TAG_PATTERNS = {
     "NUM": [NUMBER_PATTERN, PHONE_NUM_PATTERN],
     "WORDNUM": [WORD_NUM_PATTERN],
     "ORG": [ABB_BUR_PATTERN_1, ABB_BUR_PATTERN_2, ABB_ENG_PATTERN],
     "NAME": [PER_NAME_PATTERN],
-    "PARLI": [PARLI_NAME_PATTERN],
     "DATE": [DATE_PATTERN_01, DATE_PATTERN_02], 
     "TIME": [TIME_PATTERN],
     "EMAIL": [EMAIL_PATTERN], 
@@ -101,7 +81,6 @@ PROTECT_PATTERNS =[
     PER_NAME_PATTERN, #social media mention
     ABB_ENG_PATTERN, # English abbreviation
     TITLE_PATTERN, # titles
-    PARLI_NAME_PATTERN, # ထပ်ဆင့်
     ABB_BUR_PATTERN_1,ABB_BUR_PATTERN_2, # Burmese abbrev (တ.က.က)
     DATE_PATTERN_01, DATE_PATTERN_02, #Date 
     TIME_PATTERN,  # Time

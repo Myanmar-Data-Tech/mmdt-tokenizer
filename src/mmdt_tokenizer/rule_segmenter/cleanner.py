@@ -63,7 +63,13 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
     out: List["Chunk"] = []
     day_cl = ("နေ့", "ရက်")
     mth_cl =  "လ"
-    pnum_cl = ("အကြိမ်", "အနှစ်", "အသက်")
+    pnum_cl = ("အကြိမ်", "အနှစ်", "အသက်", "အချက်")
+    region_cl = ("ခရိုင်", "မြို့နယ်", "မြို့", "တိုင်းဒေသကြီး", 
+                 "ပြည်နယ်", "နိုင်ငံ", "တောင်", "ကျေးရွာ", "ရွာ",
+                 "ရပ်ကွက်", "မြို့ပြ", "မြို့တော်", "မြို့နယ်ခွဲ",
+                 "မြို့တော်ကြီး", "ဒေသ", "မြောက်ပိုင်း", "တောင်ပိုင်း",
+                 "အရှေ့ပိုင်း", "အနောက်ပိုင်း", "အလယ်ပိုင်း",
+                 "မြစ်", "ကမ်းခြေ", "ချောင်း", "တူးမြောင်း")
 
     for i, cur in enumerate(chunks):
         # default: keep original tag
@@ -77,6 +83,8 @@ def clean_cls_tag(chunks: List["Chunk"]) -> List["Chunk"]:
                 final_tag = "DAYCL"
             if prev_tag == "MONTH" and cur.text == mth_cl:
                 final_tag = "MONTHCL"
+            if prev_tag == "REGION" and cur.text in region_cl:
+                final_tag = "REGIONCL"
 
             if next_tag in ("NUM", "WORDNUM") and cur.text in pnum_cl:
                 final_tag = "INUMCL"
@@ -106,10 +114,10 @@ def clean_postp_tag(chunks: List["Chunk"]) -> List["Chunk"]:
             prev_text = chunks[i -1].text if i-1 > 0 else ""
             prev_prev_tag = chunks[i - 2].tag if i-2 > 0 else None
             prev_prev_text = chunks[i - 2].text if i-2 > 0 else ""
-            next_tag = chunks[i + 1].tag if i+1<n else None
 
-            if (i == 0 or next_tag == "RAW" or 
+            if (i == 0 or 
                 (prev_tag == "POSTP" and prev_text == ch.text) or
+                (prev_text == "အ") or
                 (prev_tag == "PUNCT" and prev_prev_tag == "POSTP" and prev_prev_text == ch.text)):
                 out.append(Chunk(ch.span, ch.text, "RAW"))
                 i +=1
@@ -126,7 +134,7 @@ def clean_sfp_chunks(chunks: List["Chunk"]) -> List["Chunk"]:
     Rule 1: PRED + NEG_SET_SFP (NOW TAGGED AS CONJ)
     """
     NEG_SENT_SFP = ("နဲ့", "နှင့်", "နှင့်")   
-    ISOLATED_SFP_TO_POSTP = {'ပြီ', '၏', 'စေ', 'သည်', 'မည်', 'ပါ'}
+    ISOLATED_SFP_TO_POSTP = {'ပြီ', '၏', 'စေ', 'သည်'}
     out = []
     i = 0
     n = len(chunks)

@@ -20,16 +20,8 @@ def collapse_to_phrases(chunks):
             txt = getattr(ch, "text", "") 
             
             if tag == "PUNCT":
-                # skip punctuation except ။
-                if surface and txt in ("။", "၊"): surface[-1] +=txt
-                flush()
-                continue
-
-            if tag in ("NUMCL", "DAYCL", "MONTHCL", "CONJ", "POSTP"):
-                # Merge to last text
-                if buf: buf.append(txt)
-                elif surface: surface[-1] +=txt
-                else: surface.append(txt)
+                # skip punctuation except ။ (to mark the end of sentence)
+                if surface and txt == "။": surface.append(txt)
                 flush()
                 continue
 

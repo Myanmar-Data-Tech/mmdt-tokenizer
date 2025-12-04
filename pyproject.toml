@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mmdt-tokenizer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Myanmar Text Segmenter"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,7 +27,3 @@ dev = [
   "jupyter",
 ]
 
-[tool.setuptools]
-# Only install Python packages under mmdt_tokenizer/
-packages = { find = { where = ["."], include = ["mmdt_tokenizer*"], exclude = ["tests*", "scripts*", "tools*"] } }
-include-package-data = true

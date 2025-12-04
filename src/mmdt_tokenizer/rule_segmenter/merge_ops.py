@@ -23,10 +23,13 @@ def merge_num_classifier(chunks: List[Chunk]) -> List[Chunk]:
         if cur.tag in NUMBER_TAGS:
             num_start = cur.span[0]
             j = i
-
+            wordnum = 0
             # Merge NUM and punctuation inside the number
-            while j < n and (chunks[j].tag in NUMBER_TAGS or chunks[j].tag == "PUNCT"):
+            while j < n and (chunks[j].tag in NUMBER_TAGS or chunks[j].tag == "PUNCT"): 
                 j += 1
+                if(chunks[j].tag == "WORDNUM"): wordnum +=1
+            
+            if(chunks[j - 1].text == "နှစ်" and wordnum ==1): j -= 1
 
             num_text = "".join(c.text for c in chunks[i:j]).strip().replace(" ", "")
             num_end = chunks[j - 1].span[1]
@@ -100,10 +103,11 @@ def merge_predicate(chunks: List["Chunk"]) -> List["Chunk"]:
 
                 else:
                     # positive pred
+                    
                     if sfp_vep_index is not None:
                         k = sfp_vep_index
                         pred_part = chunks[k : i + 1]
-                        
+
                         if(len(pred_part)>1):
                             pred_text = "".join(ch.text for ch in pred_part)
                             pred_start = pred_part[0].span[0]
