@@ -7,23 +7,23 @@ def tokenizer():
 
 
 def test_conjunctions(tokenizer):
-    text = "သူသွားမယ်သို့မဟုတ်သူလာမယ်။"
+    text = "အဲဒီအချိန်ကတည်းကစက်ရုံကို စွန့်ခွာသွားတာဖြစ်ပါတယ်။ကြိုးစားသော်လည်း စာမေးပွဲကျပါသည်။သို့သော် စိတ်မပျက်ပါ။"
     tokens = tokenizer.word_tokenize(text)
-    expected = [["သူ", "သွားမယ်", "သို့မဟုတ်", "သူ", "လာမယ်။"]]
+    expected = [['အဲဒီအချိန်', 'ကတည်းက', 'စက်ရုံ', 'ကို', 'စွန့်ခွာ', 'သွားတာဖြစ်ပါတယ်', '။', 'ကြိုးစား', 'သော်လည်း', 'စာမေးပွဲကျ', 'ပါသည်', '။', 'သို့သော်', 'စိတ်', 'မပျက်ပါ', '။']]
     assert tokens == expected
 
 
 def test_month_and_date(tokenizer):
-    text = "မေလ ၁ ရက်နေ့မှာ စတင်မည်။"
+    text = "၂၀၂၅ ခုနှစ် မေလ ၅ရက် သည် ကျွန်မတို့အတွက် အရေးပါသည်"
     tokens = tokenizer.word_tokenize(text)
-    expected = ['မေလ', '၁ရက်နေ့မှာ', "စတင်", "မည်။"]
+    expected = ['၂၀၂၅ ခုနှစ် မေလ ၅ရက်', 'သည်', 'ကျွန်မတို့', 'အတွက်', 'အရေး', 'ပါသည်']
     assert tokens[0] == expected
 
 
 def test_negation(tokenizer):
-    text = "အစီအစဥ်ကို သူမစိတ်ဆိုး မနေပါဘူး"
+    text = "အစီအစဥ်ကို သူမ စိတ်ဆိုး မနေပါဘူး"
     tokens = tokenizer.word_tokenize(text)
-    expected = ['အစီအစဥ်ကို', 'သူမစိတ်ဆိုး', 'မနေပါဘူး']
+    expected = ['အစီအစဥ်', 'ကို', 'သူမ', 'စိတ်ဆိုး', 'မနေပါဘူး']
     assert tokens[0] == expected
 
 def test_punctuation_only(tokenizer):
