@@ -135,6 +135,19 @@ print(tokens)
 Distributed under the MIT License. See LICENSE for more information.
 
 ---
+## ⭐ Citation / Credit
+If you use this project in your work, research, or product, please consider giving credit by linking back to this repository or citing it.
+
+### Suggested Citation
+```bibtex
+@misc{mmdt_tokenizer_2025,
+  author       = {MMDT Team},
+  title        = {MMDT-Tokenizer: Grammar-based Text Segmentation},
+  year         = {2026},
+  publisher    = {GitHub},
+  howpublished = {\url{https://github.com/Myanmar-Data-Tech/mmdt-tokenizer}}
+}
+---
 ## Changelog / Versioning
 
 v0.1.0 — initial release with core tokenization features
